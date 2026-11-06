@@ -10,7 +10,7 @@ routes = [{ pattern = "dash.gershoncrm.com/*", zone_name = "gershoncrm.com" }]
 
 [[kv_namespaces]]
 binding = "BOARD"
-id = "REPLACE_WITH_LIVE_KV_NAMESPACE_ID"
+id = "4d91439246484a5485e8a9808047abc2"   # KV namespace "gershon-dash" (bound as DASH_KV on the live Pages project; read-only check 2026-11-06)
 
 # v1.2: NO cron here. The Monday schedule lives in the separate
 # gershon-dash-cron Worker (apps/dash-cron/wrangler.toml, "15 12 * * 1"),

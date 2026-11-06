@@ -6,8 +6,8 @@
 //      "15 12 * * 1") calls refreshBoard() every Monday and creates/refreshes
 //      the CURRENT ISO week's board (same week-creation code as below);
 //   2. the home page always targets the current ISO week. If that board does
-//      not exist yet it shows "This week's board is being prepared" instead of
-//      an old week;
+//      not exist yet it says so plainly ("Latest board: 2026-W42 (3 weeks old) -
+//      next board builds Monday 9 Nov") instead of showing an old week;
 //   3. self-heal: if the current week is missing, the first visit kicks off ONE
 //      background refresh (at most every 6 h).
 // Visitors can no longer create arbitrary weeks by typing /w/<week>.
@@ -74,7 +74,7 @@ export default {
       // Landing page = the current week's board, never an older week.
       const wk = boardWeek(now);
       const snap = await env.BOARD.get(`snap:${wk.week}`, 'json');
-      if (!snap || !Array.isArray(snap.platforms)) return html(renderPreparing(wk, index));
+      if (!snap || !Array.isArray(snap.platforms)) return html(renderPreparing(wk, index, { latest: index[0] || null, now }));
       return html(renderBoard(snap, index, now, { expectedWeek: wk.week }));
     }
     const m = url.pathname.match(/^\/w\/(\d{4}-W\d{2})\/?$/);

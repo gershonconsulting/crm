@@ -21,7 +21,7 @@ crons = ["15 12 * * 1"]
 # apps/dash/wrangler.toml once Charles has filled it in.
 [[kv_namespaces]]
 binding = "BOARD"
-id = "REPLACE_WITH_LIVE_KV_NAMESPACE_ID"
+id = "4d91439246484a5485e8a9808047abc2"   # KV namespace "gershon-dash" (bound as DASH_KV on the live Pages project; read-only check 2026-11-06)
 
 [observability]
 enabled = true
