@@ -1,50 +1,54 @@
 # GershonCRM
 
-A Streak.com-style CRM built as a **standalone platform** (no Gmail integration) for Gershon Consulting clients — global B2B companies entering the US market.
+A standalone Streak-style CRM pilot for Gershon Consulting. Target: **https://crm.gershon.ai**, on the existing Hostinger VPS. Production deployment and the GC pipeline migration are not complete.
 
-**Production:** `https://crm.gershonCRM.com` *(live after first deploy)*
+## Claude Cowork: start here
 
-## Quick links
+Read [COWORK_HANDOFF.md](docs/COWORK_HANDOFF.md) for Olivier's decisions, the exact Streak pipeline, implemented changes, test limits, remaining work and deployment order. [STATUS.md](docs/STATUS.md) is the current readiness snapshot. These supersede older briefs and checkpoint snapshots for this CRM task.
 
-- **Deploying?** Operators start at [`docs/ARIEL_MISSION.md`](./docs/ARIEL_MISSION.md)
-- **Project background** → [`docs/HANDOFF.md`](./docs/HANDOFF.md)
-- **What is outstanding right now?** → [`checkpoints/INDEX.md`](./checkpoints/INDEX.md)
-- **How requests to Charles get tracked** → [`docs/CHECKPOINTS.md`](./docs/CHECKPOINTS.md)
-- **Full deployment runbook** → [`docs/DEPLOY.md`](./docs/DEPLOY.md)
+- Password login first; only **olivier@gershonconsulting.com** is admitted during the pilot.
+- Google sign-in activation and Google Cloud organization registration are deferred.
+- The linked GC pipeline must be migrated explicitly. The historical MAbSilico files are a different source; startup does not import them.
+- Client access stays disabled until per-pipeline isolation and assignments are implemented.
 
 ## Stack
 
-- **Frontend:** React 18, Vite, TypeScript, Tailwind, shadcn/ui, dnd-kit, React Query, Wouter
-- **Backend:** Node.js 20, Express, Drizzle ORM, Passport (local strategy)
-- **Database:** PostgreSQL 16
-- **AI:** OpenAI API
-- **Infra:** Hostinger KVM VPS, PM2, nginx, Let's Encrypt, Cloudflare, GitHub Actions CI/CD
+React 18, Vite, TypeScript, Tailwind and shadcn/ui; Node 24, Express, Drizzle and PostgreSQL; scrypt password hashes and PostgreSQL-backed sessions. The prepared VPS deployment uses PM2, nginx, Let's Encrypt and Cloudflare. The OpenAI dependency is unused in this pilot. The deployment workflow remains a template.
 
 ## Local development
 
 ```bash
 npm ci
-cp .env.example .env    # fill DATABASE_URL, SESSION_SECRET, OPENAI_API_KEY
-npm run db:push
-npm run dev             # http://localhost:5000
+cp .env.example .env
+# Set NODE_ENV=development and APP_URL=http://localhost:5000 in .env.
+# Set DATABASE_URL and a random SESSION_SECRET of at least 32 characters.
+# Keep PILOT_ADMIN_EMAIL=olivier@gershonconsulting.com; Google values are optional.
+npm run db:push          # fresh empty development database only
+npm run admin:create    # interactive hidden password prompts; no default password
+npm run dev
 ```
 
-## Project layout
+Back up and review migrations before applying schema changes to an existing database. Secrets must never be committed. The application binds to 127.0.0.1 and defaults to port 5000.
 
+## Checks
+
+```bash
+npm run check
+npm test
+npm run build
+node --test apps/dash/test/dash.test.mjs
 ```
-client/              React + Vite frontend
-server/              Express + Drizzle backend
-shared/              Shared types + Drizzle schema
-docs/                Deployment docs (start: ARIEL_MISSION.md)
-  deploy/            Phase-by-phase runbook (01-09)
-.github/workflows/   CI/CD — auto-deploy to VPS on push to main
-attached_assets/     Reference data (MAbSilico Streak export)
-```
 
-## Deploy
+The six pilot tests do not replace successful login, authenticated CRUD, import reconciliation, backup restoration or restart checks on real PostgreSQL. See the handoff for their precise coverage.
 
-Push to `main` → GitHub Actions SSHes into the VPS → pull, rebuild, `pm2 restart`. First-time VPS setup: `docs/DEPLOY.md`.
+## Deployment
+
+Start with [the Cowork handoff](docs/COWORK_HANDOFF.md), then use [DEPLOY.md](docs/DEPLOY.md) and the current [private-pilot application instructions](docs/deploy/04-deploy-app.md). Do not activate auto-deploy until the VPS, backups, hostname and service paths have been verified. No production credentials are included.
+
+## Layout
+
+client/ — frontend; server/ — API and authentication; shared/ — schemas and types; scripts/ — interactive admin setup; migrations/ — reviewed additive changes; docs/ — handoff and runbooks; apps/dash/ — separate weekly-board application.
 
 ## License
 
-Proprietary — © Gershon Consulting LLC.
+Proprietary — © Gershon Consulting LLC. Historical package metadata should be reconciled before distribution.

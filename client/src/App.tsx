@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { UserRoleProvider } from "@/hooks/use-user-role";
+import SignInGate from "@/components/auth/SignInGate";
 import NotFound from "@/pages/not-found";
 import Pipeline from "@/pages/pipeline";
 import Dashboard from "@/pages/dashboard";
@@ -13,6 +14,7 @@ import AdminPage from "@/pages/admin";
 import ByFit from "@/pages/views/by-fit";
 import ByInterest from "@/pages/views/by-interest";
 import ByMonth from "@/pages/views/by-month";
+import Tasks from "@/pages/tasks";
 
 function Router() {
   return (
@@ -20,6 +22,7 @@ function Router() {
       <Route path="/" component={Pipeline} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/contacts" component={Contacts} />
+      <Route path="/tasks" component={Tasks} />
       <Route path="/reports" component={Reports} />
       <Route path="/settings" component={Settings} />
       <Route path="/adminpanel" component={AdminPage} />
@@ -35,7 +38,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <UserRoleProvider>
-        <Router />
+        <SignInGate><Router /></SignInGate>
         <Toaster />
       </UserRoleProvider>
     </QueryClientProvider>

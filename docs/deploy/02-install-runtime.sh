@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # GershonCRM — Phase 2: Install runtime (run on VPS as `deploy`)
-# Installs: Node 20 LTS, PostgreSQL 16, nginx, certbot, PM2
+# Installs: Node 24 LTS, PostgreSQL 16, nginx, certbot, PM2
 set -euo pipefail
 
 echo "==> Updating package index"
 sudo apt update
 
-echo "==> Node.js 20 LTS"
-if ! command -v node &> /dev/null || [[ "$(node -v)" != v20.* ]]; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+echo "==> Node.js 24 LTS"
+if ! command -v node &> /dev/null || [[ "$(node -v)" != v24.* ]]; then
+  curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
   sudo apt install -y nodejs
 fi
 node -v && npm -v

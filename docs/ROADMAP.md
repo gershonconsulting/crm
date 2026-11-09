@@ -1,3 +1,5 @@
+> Current implementation and pilot scope are recorded in [STATUS.md](STATUS.md). Historical shipped/deployed claims below are unverified; multi-pipeline access and Streak parity remain unfinished.
+
 # GershonCRM — Product Roadmap: From Single-Pipeline MVP to Streak Replica
 
 > **Audience:** Olivier (decisions) + AI operators (Ariel/Samuel for execution, Claude CTO for architecture).

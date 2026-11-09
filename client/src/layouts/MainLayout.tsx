@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import Sidebar from '@/components/sidebar/Sidebar';
-import UserRoleSelector from '@/components/auth/UserRoleSelector';
+import { useUserRole } from '@/hooks/use-user-role';
 import { Bell, Settings, HelpCircle, Menu, Tag } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,15 @@ interface MainLayoutProps {
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const { user } = useUserRole();
+  const [signOutError, setSignOutError] = useState(false);
+  const signOut = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      if (!response.ok) throw new Error('Sign-out failed');
+      window.location.assign('/');
+    } catch { setSignOutError(true); }
+  };
   const [location] = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -56,6 +65,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             
             {/* Right side buttons */}
             <div className="ml-4 flex items-center md:ml-6">
+              <span className="hidden lg:inline mr-3 text-sm text-slate-600">{user?.email}</span>
+              <button onClick={signOut} className="mr-4 text-sm font-medium text-red-700">Sign out</button>
+              {signOutError && <span role="alert" className="text-sm text-red-700">Please try signing out again.</span>}
 
               
               {/* Version indicator */}

@@ -4,12 +4,12 @@
 
 ## 6.1 nginx site config
 
-Create `/etc/nginx/sites-available/crm.gershoncrm.com`:
+Create `/etc/nginx/sites-available/crm.gershon.ai`:
 
 ```nginx
 server {
     listen 80;
-    server_name crm.gershoncrm.com;
+    server_name crm.gershon.ai;
 
     location / {
         proxy_pass http://127.0.0.1:5000;
@@ -29,16 +29,16 @@ server {
 ```
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/crm.gershoncrm.com /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/crm.gershon.ai /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
-curl -I http://crm.gershoncrm.com   # now answered by the Node app (200 or 302), not the nginx default page
+curl -I http://crm.gershon.ai   # now answered by the Node app (200 or 302), not the nginx default page
 ```
 
 ## 6.2 Issue certificate
 
 ```bash
-sudo certbot --nginx -d crm.gershoncrm.com
+sudo certbot --nginx -d crm.gershon.ai
 ```
 
 Answers: email `olivier@gershonconsulting.com` · agree ToS · N to EFF mail · **2 (redirect HTTP→HTTPS)**.
@@ -48,8 +48,8 @@ Certbot rewrites the nginx config for 443 + redirect. Don't hand-edit afterward 
 ## 6.3 Verify
 
 ```bash
-curl -I https://crm.gershoncrm.com   # HTTP/2 200 or 302, valid cert (no -k needed)
-curl -I http://crm.gershoncrm.com    # 301 -> https
+curl -I https://crm.gershon.ai   # HTTP/2 200 or 302, valid cert (no -k needed)
+curl -I http://crm.gershon.ai    # 301 -> https
 sudo systemctl list-timers | grep certbot   # certbot.timer active (auto-renew)
 ```
 

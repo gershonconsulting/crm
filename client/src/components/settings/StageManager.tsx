@@ -29,10 +29,7 @@ export default function StageManager() {
   // Create stage mutation
   const createStageMutation = useMutation({
     mutationFn: async (newStage: { name: string; probability: number; color: string }) => {
-      return apiRequest('/api/deal-stages', {
-        method: 'POST',
-        body: JSON.stringify(newStage),
-      });
+      return apiRequest('POST', '/api/deal-stages', { ...newStage, order: Math.max(0, ...(stages || []).map(s => s.order)) + 1 });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/deal-stages'] });
@@ -55,13 +52,10 @@ export default function StageManager() {
   // Update stage mutation
   const updateStageMutation = useMutation({
     mutationFn: async (stage: { id: number; name: string; probability: number; color: string }) => {
-      return apiRequest(`/api/deal-stages/${stage.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({
+      return apiRequest('PUT', `/api/deal-stages/${stage.id}`, {
           name: stage.name,
           probability: stage.probability,
           color: stage.color,
-        }),
       });
     },
     onSuccess: () => {
@@ -85,9 +79,7 @@ export default function StageManager() {
   // Delete stage mutation
   const deleteStageMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/deal-stages/${id}`, {
-        method: 'DELETE',
-      });
+      return apiRequest('DELETE', `/api/deal-stages/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/deal-stages'] });
@@ -110,10 +102,7 @@ export default function StageManager() {
   // Reorder stage mutation
   const reorderStageMutation = useMutation({
     mutationFn: async ({ id, direction }: { id: number; direction: 'up' | 'down' }) => {
-      return apiRequest(`/api/deal-stages/${id}/reorder`, {
-        method: 'POST',
-        body: JSON.stringify({ direction }),
-      });
+      return apiRequest('POST', `/api/deal-stages/${id}/reorder`, { direction });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/deal-stages'] });
