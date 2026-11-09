@@ -66,8 +66,8 @@ const AdminPage: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<string>("users");
 
   // Fetch users
-  const { data: users = [], isLoading, refetch } = useQuery({
-    queryKey: ['/api/admin/users'],
+  const { data: users = [], isLoading, refetch } = useQuery<User[]>({
+    queryKey: ['/api/users'],
     enabled: isAdmin
   });
 
@@ -90,7 +90,7 @@ const AdminPage: React.FC = () => {
   // Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (values: UserFormValues) => {
-      const res = await apiRequest('POST', '/api/admin/users', values);
+      const res = await apiRequest('POST', '/api/users', values);
       return res.json();
     },
     onSuccess: () => {
@@ -98,7 +98,7 @@ const AdminPage: React.FC = () => {
         title: "Success",
         description: "User has been created successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       setIsUserFormOpen(false);
       form.reset();
     },
@@ -115,7 +115,7 @@ const AdminPage: React.FC = () => {
   const updateUserMutation = useMutation({
     mutationFn: async (values: UserFormValues & { id: number }) => {
       const { id, ...userData } = values;
-      const res = await apiRequest('PATCH', `/api/admin/users/${id}`, userData);
+      const res = await apiRequest('PUT', `/api/users/${id}`, userData);
       return res.json();
     },
     onSuccess: () => {
@@ -123,7 +123,7 @@ const AdminPage: React.FC = () => {
         title: "Success",
         description: "User has been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
       setIsUserFormOpen(false);
       setSelectedUser(null);
       form.reset();
@@ -140,7 +140,7 @@ const AdminPage: React.FC = () => {
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await apiRequest('DELETE', `/api/admin/users/${id}`);
+      const res = await apiRequest('DELETE', `/api/users/${id}`);
       return res.json();
     },
     onSuccess: () => {
@@ -148,7 +148,7 @@ const AdminPage: React.FC = () => {
         title: "Success",
         description: "User has been deleted successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
     },
     onError: (error: any) => {
       toast({

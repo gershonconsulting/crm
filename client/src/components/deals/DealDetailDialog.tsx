@@ -50,6 +50,7 @@ import { UserRole, useUserRole } from '@/hooks/use-user-role';
 import RoleBasedAccess from '@/components/auth/RoleBasedAccess';
 import { apiRequest } from '@/lib/queryClient';
 import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import CustomColumnsEditor from './CustomColumnsEditor';
 import ContactDetailsCard from '@/components/contacts/ContactDetailsCard';
 
@@ -67,6 +68,29 @@ const DealDetailDialog: React.FC<DealDetailDialogProps> = ({
   onEdit,
 }) => {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [comment, setComment] = useState('');
+  const [saving, setSaving] = useState(false);
+  const saveComment = async () => {
+    if (!comment.trim()) return;
+    setSaving(true);
+    try {
+      await apiRequest('POST', '/api/activities', { type: 'note', description: comment.trim(), dealId: deal.id, contactId: deal.contactId });
+      setComment('');
+      queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
+    } catch { toast({ title: 'Note could not be saved', description: 'Please try again.', variant: 'destructive' }); }
+    finally { setSaving(false); }
+  };
+  const deleteDeal = async () => {
+    if (!window.confirm(`Delete ${deal.name}? This cannot be undone.`)) return;
+    try {
+      await apiRequest('DELETE', `/api/deals/${deal.id}`);
+      await queryClient.invalidateQueries({ queryKey: ['/api/deals'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/activities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      onOpenChange(false);
+    } catch { toast({ title: 'Deal could not be deleted', variant: 'destructive' }); }
+  };
   
   // Fetch all stages
   const { data: stages = [] } = useQuery<DealStage[]>({
@@ -182,6 +206,7 @@ const DealDetailDialog: React.FC<DealDetailDialogProps> = ({
               <RoleBasedAccess allowedRoles={[UserRole.ADMIN]}>
                 <Button 
                   variant="destructive" 
+                  onClick={deleteDeal}
                   size="sm" 
                   className="flex items-center"
                 >
@@ -201,8 +226,8 @@ const DealDetailDialog: React.FC<DealDetailDialogProps> = ({
               
               <TabsContent value="all" className="mt-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <Input placeholder="Add comment (for saving notes)" className="flex-grow" />
-                  <Button size="sm" variant="default" className="bg-red-600 hover:bg-red-700">Save</Button>
+                  <Input aria-label="Add note" placeholder="Add a note" value={comment} onChange={e => setComment(e.target.value)} className="flex-grow" />
+                  <Button onClick={saveComment} disabled={saving || !comment.trim()} size="sm" variant="default" className="bg-red-600 hover:bg-red-700">{saving ? 'Saving…' : 'Save'}</Button>
                 </div>
                 
                 <Card>
@@ -267,7 +292,7 @@ const DealDetailDialog: React.FC<DealDetailDialogProps> = ({
                   <SelectValue placeholder="Select stage" />
                 </SelectTrigger>
                 <SelectContent>
-                  {stages.sort((a, b) => a.order - b.order).map(stage => (
+                  {[...stages].sort((a, b) => a.order - b.order).map(stage => (
                     <SelectItem key={stage.id} value={stage.id.toString()}>
                       {stage.name}
                     </SelectItem>

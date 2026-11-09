@@ -164,10 +164,11 @@ const TasksPage: React.FC = () => {
   // Create/Update task
   const taskMutation = useMutation({
     mutationFn: async (values: z.infer<typeof taskFormSchema>) => {
+      const payload = { ...values, dueDate: values.dueDate ? new Date(values.dueDate).toISOString() : null };
       if (selectedTask) {
-        return apiRequest('PUT', `/api/tasks/${selectedTask.id}`, values);
+        return apiRequest('PUT', `/api/tasks/${selectedTask.id}`, payload);
       } else {
-        return apiRequest('POST', `/api/tasks`, values);
+        return apiRequest('POST', `/api/tasks`, payload);
       }
     },
     onSuccess: () => {

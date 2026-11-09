@@ -62,7 +62,7 @@ const Pipeline: React.FC = () => {
         </div>
 
         {/* Pipeline View */}
-        <PipelineView onNewDeal={() => setIsDealFormOpen(true)} />
+        <PipelineView />
 
         {/* Recent Activity */}
         <div className="mt-8">

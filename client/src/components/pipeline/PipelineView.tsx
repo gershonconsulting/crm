@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { DealWithContact, DealStage } from '@shared/schema';
 import { apiRequest } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Filter, Plus, ChevronDown, ArrowUp, ArrowDown } from 'lucide-react';
 import DealDetailDialog from '@/components/deals/DealDetailDialog';
 import DealForm from '@/components/deals/DealForm';
@@ -39,6 +40,19 @@ const stageColors = {
 
 const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals }) => {
   const queryClient = useQueryClient();
+  const [search, setSearch] = useState('');
+          const [columns, setColumns] = useState([
+            { id: 'checkbox', label: <Checkbox />, width: 5, minWidth: 3, maxWidth: 8 },
+            { id: 'name', label: 'Name', width: 20, minWidth: 10, maxWidth: 30 },
+            { id: 'contact', label: 'Contacts and organizations', width: 20, minWidth: 10, maxWidth: 30 },
+            { id: 'stage', label: 'Stage', width: 15, minWidth: 8, maxWidth: 25 },
+            { id: 'source', label: 'Source', width: 10, minWidth: 5, maxWidth: 20 },
+            { id: 'thread', label: 'Thread', width: 10, minWidth: 5, maxWidth: 20 },
+            { id: 'notes', label: 'Notes', width: 15, minWidth: 10, maxWidth: 30 },
+            { id: 'done', label: 'Done', width: 5, minWidth: 3, maxWidth: 10 },
+          ]);
+
+
   const [selectedDeal, setSelectedDeal] = useState<DealWithContact | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -54,7 +68,10 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
   });
   
   // Use filtered deals if provided, otherwise use all deals
-  const deals = filteredDeals || fetchedDeals;
+  const deals = (filteredDeals || fetchedDeals).filter(deal => {
+    const query = search.trim().toLowerCase();
+    return !query || [deal.name, deal.contact?.name, deal.contact?.company, deal.notes, deal.source].some(value => value?.toLowerCase().includes(query));
+  });
 
   const handleDealClick = (deal: DealWithContact) => {
     setSelectedDeal(deal);
@@ -110,10 +127,7 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
           </h2>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4">
-          <Button variant="outline" className="mr-2">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
+          <Input aria-label="Search pipeline" placeholder="Search companies, contacts, notes…" value={search} onChange={e => setSearch(e.target.value)} className="mr-2 w-full sm:w-72" />
           <RoleBasedAccess allowedRoles={[UserRole.MANAGER, UserRole.ADMIN]}>
             <Button onClick={handleNewDeal}>
               <Plus className="h-4 w-4 mr-2" />
@@ -123,46 +137,12 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
         </div>
       </div>
       
-      {/* Pipeline Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-6">
-        <div className="bg-white p-4 rounded-md shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Total Active Deals</p>
-          <p className="text-2xl font-bold">{deals.length}</p>
-          <div className="mt-2 flex items-center text-xs">
-            <span className="text-green-600 flex items-center">
-              <ArrowUp className="h-3 w-3 mr-1" />
-              5.3%
-            </span>
-            <span className="ml-1 text-gray-500">vs last week</span>
-          </div>
-        </div>
-        
-        <div className="bg-white p-4 rounded-md shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Deals Won This Month</p>
-          <p className="text-2xl font-bold">
-            {deals.filter(d => d.stage?.name === 'WON').length}
-          </p>
-          <div className="mt-2 flex items-center text-xs">
-            <span className="text-green-600 flex items-center">
-              <ArrowUp className="h-3 w-3 mr-1" />
-              12.5%
-            </span>
-            <span className="ml-1 text-gray-500">vs previous month</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-md shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Average Leads Per Month</p>
-          <p className="text-2xl font-bold">87</p>
-          <div className="mt-2 flex items-center text-xs">
-            <span className="text-green-600 flex items-center">
-              <ArrowUp className="h-3 w-3 mr-1" />
-              24.7%
-            </span>
-            <span className="ml-1 text-gray-500">vs last month</span>
-          </div>
-        </div>
+        <div className="rounded-md border bg-white p-4"><p className="text-sm text-gray-500">Matching deals</p><p className="text-2xl font-bold">{deals.length}</p></div>
+        <div className="rounded-md border bg-white p-4"><p className="text-sm text-gray-500">Completed</p><p className="text-2xl font-bold">{deals.filter(d => d.done).length}</p></div>
+        <div className="rounded-md border bg-white p-4"><p className="text-sm text-gray-500">Total deal value</p><p className="text-2xl font-bold">{new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD', maximumFractionDigits: 0}).format(deals.reduce((sum, d) => sum + (d.value || 0), 0))}</p></div>
       </div>
+      {deals.length === 0 && <p className="rounded-lg border p-5 text-sm text-gray-600">{search ? 'No deals match this search.' : 'No deals yet. Import the GC pipeline or create a deal to begin.'}</p>}
 
       {/* Pipeline Summary - Exact match to the image */}
       <div className="mt-6 rounded-md overflow-hidden">
@@ -181,7 +161,7 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
                 className="text-center text-white font-medium"
                 style={{ 
                   width, 
-                  backgroundColor: stageColors[stage.name as keyof typeof stageColors] || stage.color,
+                  backgroundColor: stage.color,
                   padding: '8px 0'
                 }}
               >
@@ -197,17 +177,6 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
       <div className="mt-6">
         {/* Column configuration */}
         {(() => {
-          const [columns, setColumns] = useState([
-            { id: 'checkbox', label: <Checkbox />, width: 5, minWidth: 3, maxWidth: 8 },
-            { id: 'name', label: 'Name', width: 20, minWidth: 10, maxWidth: 30 },
-            { id: 'contact', label: 'Contacts and organizations', width: 20, minWidth: 10, maxWidth: 30 },
-            { id: 'stage', label: 'Stage', width: 15, minWidth: 8, maxWidth: 25 },
-            { id: 'source', label: 'Source', width: 10, minWidth: 5, maxWidth: 20 },
-            { id: 'thread', label: 'Thread', width: 10, minWidth: 5, maxWidth: 20 },
-            { id: 'notes', label: 'Notes', width: 15, minWidth: 10, maxWidth: 30 },
-            { id: 'done', label: 'Done', width: 5, minWidth: 3, maxWidth: 10 },
-          ]);
-
           const handleColumnsChange = (newColumns: any) => {
             setColumns(newColumns);
           };
@@ -236,7 +205,7 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
                         <div className="flex items-center">
                           <div 
                             className="w-3 h-3 rounded-sm mr-1"
-                            style={{ backgroundColor: stageColors[stage.name as keyof typeof stageColors] || stage.color }}
+                            style={{ backgroundColor: stage.color }}
                           />
                           <span className="font-medium">{stage.name}</span>
                           <span className="ml-1 text-gray-500">({stageDeals.length})</span>
@@ -273,7 +242,7 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
                                 <div className="flex items-center">
                                   <div 
                                     className="w-2 h-2 rounded-sm mr-1"
-                                    style={{ backgroundColor: stageColors[stage.name as keyof typeof stageColors] || stage.color }}
+                                    style={{ backgroundColor: stage.color }}
                                   />
                                   <Select 
                                     defaultValue={stage.id.toString()} 
@@ -295,7 +264,7 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
                                           <div className="flex items-center">
                                             <div 
                                               className="w-2 h-2 rounded-sm mr-1"
-                                              style={{ backgroundColor: stageColors[s.name as keyof typeof stageColors] || s.color }}
+                                              style={{ backgroundColor: s.color }}
                                             />
                                             {s.name}
                                           </div>
@@ -322,7 +291,10 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
                             case 'notes':
                               return deal.notes || '-';
                             case 'done':
-                              return deal.done !== null && <Checkbox checked={Boolean(deal.done)} />;
+                              return <Checkbox aria-label={`Mark ${deal.name} complete`} checked={Boolean(deal.done)} onClick={e => e.stopPropagation()} onCheckedChange={async checked => {
+                                try { await apiRequest('PUT', `/api/deals/${deal.id}`, { done: checked === true }); queryClient.invalidateQueries({ queryKey: ['/api/deals'] }); }
+                                catch { window.alert('The change could not be saved. Please try again.'); }
+                              }} />;
                             default:
                               return null;
                           }
@@ -332,7 +304,8 @@ const PipelineView: React.FC<PipelineViewProps> = ({ onNewDeal, filteredDeals })
                         return (
                           <div 
                             key={deal.id}
-                            className="cursor-pointer hover:bg-gray-50 text-xs px-2 py-1 grid grid-cols-8 gap-2"
+                            className="cursor-pointer hover:bg-gray-50 text-xs px-2 py-1 grid gap-2"
+                            style={{ gridTemplateColumns: columns.map(c => `${c.width}fr`).join(" ") }}
                             onClick={() => handleDealClick(deal)}
                           >
                             {columns.map(col => (
