@@ -1,25 +1,29 @@
-# GershonCRM — Deployment Status Snapshot
+# GershonCRM — Status
 
-**As of:** 2026-11-06 (verified by Ariel/Cowork)
-**This repo:** full mirror of `gershonconsulting/gershonCRM` (all branches + history), created 2026-11-06, plus the Cowork session knowledge docs in `docs/`.
+**Last updated:** 2026-11-10 (Ariel)
 
-## Where the deployment stands
+## ✅ LIVE at https://crm.gershon.ai
 
-Mission 1 (runbook committed to GitHub) is done — see `docs/DEPLOY.md`, `docs/ARIEL_MISSION.md`, `docs/CHARLES_MISSION.md`, `docs/HANDOFF.md`, `docs/deploy/01–09`.
+Deployed 2026-11-10 on the existing Hostinger VPS (srv1511567, 187.124.235.148) — the original Phase 0–9 runbook (docs/DEPLOY.md) was superseded by a simpler route on Olivier's decision:
 
-Mission 2 (execute deploy phases 0–9) has **not started**. Verified today:
+- Docker Compose at `/opt/gershoncrm` (app container + postgres:16, volume `dbdata`), app on 127.0.0.1:5001
+- Caddy (already on the VPS) terminates TLS for `crm.gershon.ai` (auto Let's Encrypt) — no nginx/certbot
+- DNS: A record `crm` → VPS IP in Cloudflare zone `gershon.ai`, DNS-only (grey)
+- `server/db.ts` switched from Neon serverless driver to node-postgres (commit 9d7a0eb)
+- Seeded: 10 stages, 2,095 contacts, 1,048 deals (Streak export CSVs); admin user `olivier` created
+- ⚠️ App has NO built-in login yet — protected by Caddy basic_auth (user `olivier`) until real auth ships (see Issues)
+- Nightly backup: cron 03:15 pg_dump → /var/backups/gershoncrm (14-day retention)
 
-- `gershoncrm.com` nameservers are still `ns1/ns2.tierra.net` — the zone is NOT on Cloudflare. This fails the Phase 0 pre-flight gate. Fix brief: `docs/CHARLES_DNS_FIX.md` (not yet executed).
-- `crm.gershoncrm.com` still CNAMEs to `gershoncrm-crm.pages.dev` and serves nothing.
-- No `.github/workflows/deploy.yml` — CI template still parked at `docs/deploy/deploy.yml.template` (activated in Phase 8).
-- No `docs/deploy/EXECUTION_LOG.md`, no GitHub Issues filed (Phase 9 items).
+## ❌ Open
 
-## Blockers before GO
+- Implement real authentication (login UI + sessions + Google SSO) — Issue #2
+- loadInitialData() re-seeds on every restart; PORT hardcoded to 5000 — Issue #3
+- Multi-tenancy refactor before external clients
+- CI/CD push-to-deploy (GitHub Actions → VPS) not yet wired; deploys are `git pull && docker compose build app && docker compose up -d app` in /opt/gershoncrm
 
-1. Charles executes `docs/CHARLES_DNS_FIX.md` — move the zone to Cloudflare (all 14 records, grey clouds), swap NS at Tierra.net.
-2. Olivier provisions the Hostinger KVM VPS and fills the 1Password vault "GershonCRM Deploy" (VPS IP + root password, Cloudflare access, GitHub PAT repo+workflow, OPENAI_API_KEY).
-3. Olivier says GO → Ariel runs phases 0–9 per `docs/DEPLOY.md`, pausing at Charles's three tasks (phases 5, 7, 8).
+## Deploy route
 
-## Known post-launch issues (pre-catalogued, filed as Issues in Phase 9)
+SSH to VPS → `cd /opt/gershoncrm/src && git pull && cd .. && docker compose build app && docker compose up -d app`.
+Caddy config: `/etc/caddy/Caddyfile` (crm.gershon.ai block). Secrets: `/opt/gershoncrm/.env` + 1Password.
 
-loadInitialData() re-seeds on every restart; port hardcoded to 5000; no /api/health; single-tenant; in-memory session store.
+Historical docs: `docs/DEPLOY.md`, `docs/ARIEL_MISSION.md`, `docs/CHARLES_MISSION.md`, `docs/CHARLES_DNS_FIX.md` (gershoncrm.com/Tierra path — no longer the plan), `docs/AGENTS.md`.
