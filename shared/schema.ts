@@ -20,6 +20,17 @@ export const users = pgTable("users", {
   position: text("position"),
 });
 
+// One-time links that let the pilot administrator choose their own password.
+// Only a SHA-256 hash of each token is stored; tokens expire and are single use.
+export const passwordSetupTokens = pgTable("password_setup_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,

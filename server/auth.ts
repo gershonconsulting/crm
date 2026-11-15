@@ -8,6 +8,7 @@ import { eq, sql } from "drizzle-orm";
 import { db, pool } from "./db";
 import { users, type PublicUser } from "@shared/schema";
 import { isPilotOwner, isSameOriginMutation, normalizeEmail, publicUser } from "./access-policy";
+import { setupPasswordRoutes } from "./password-setup";
 
 declare module "express-session" {
   interface SessionData {
@@ -174,6 +175,8 @@ export function setupAuth(app: Express) {
       res.sendStatus(204);
     });
   });
+
+  setupPasswordRoutes(app, ownerEmail);
 
   const requirePilotOwner: RequestHandler = async (req, res, next) => {
     try {
