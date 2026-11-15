@@ -1,5 +1,15 @@
 # CRM pilot — current direction
 
+## Status 2026-11-15 (Claude, thread "Put the CRM pilot live at crm.gershon.ai")
+
+- ✅ Pilot installed on VPS srv1511567 beside the old stack: /opt/gershoncrm-pilot (app 127.0.0.1:5002, own Postgres 127.0.0.1:5433, secrets only in /opt/gershoncrm-pilot/.env). Old stack on 5001 untouched (rollback).
+- ✅ GC Streak pipeline copied read-only via the Streak connector and imported: 190 deals in 9 stages (21/73/11/22/29/19/9/4/2, same as Streak), 308 contacts, 192 tasks, 107 comment notes. Pre-import DB backup in /opt/gershoncrm-pilot/backups. Snapshot kept on the server only, never in Git.
+- ❌ crm.gershon.ai still routes to the old stack (Caddy basic auth -> 5001). Switch with deploy/pilot/switch-caddy.sh (backs up the Caddyfile; --rollback restores) once Olivier says yes.
+- ❌ Olivier's one-time "choose your password" email (deploy/pilot/send-setup-link.sh) waits on the switch, because the link opens at crm.gershon.ai.
+- Not copied: Gmail threads, attachments/files, saved views. Dropdown/tag keys resolved to names; all Streak fields kept under deal customFields.streak.
+- crm.gershon.ai is DNS-only (not Cloudflare-proxied); TLS is Caddy's own certificate, so "Full (strict)" applies only if the proxy is turned on later.
+- Steps and commands: docs/deploy/EXECUTION_LOG.md.
+
 As of 2026-11-09. Claude Cowork is the next operator; start with [COWORK_HANDOFF.md](COWORK_HANDOFF.md). This document supersedes older deployment and product-scope claims.
 
 ## Agreed scope
