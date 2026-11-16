@@ -92,8 +92,9 @@ export function coerceValue(field: { type: string; options: FieldOption[] }, raw
     case "DROPDOWN":
       return resolveOption(field.options, raw);
     case "TAG": {
-      const list = Array.isArray(raw) ? raw : String(raw).split(/[,;]/);
-      const keys = list.map((x) => resolveOption(field.options, x)).filter(Boolean);
+      // Streak returns tags as "[9001, 9041]"; also accept arrays and "a, b" strings
+      const list = Array.isArray(raw) ? raw : String(raw).replace(/^\s*\[|\]\s*$/g, "").split(/[,;]/);
+      const keys = Array.from(new Set(list.map((x) => resolveOption(field.options, String(x).trim())).filter(Boolean)));
       return keys.length ? keys : null;
     }
     case "CHECKBOX":
