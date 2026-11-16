@@ -1,6 +1,6 @@
 # GershonCRM — Status
 
-**Last updated:** 2026-11-10 (Ariel)
+**Last updated:** 2026-11-16 (Claude) — Streak copy v2 (branch feat/streak-copy)
 
 ## ✅ LIVE at https://crm.gershon.ai
 
@@ -14,10 +14,19 @@ Deployed 2026-11-10 on the existing Hostinger VPS (srv1511567, 187.124.235.148) 
 - ⚠️ App has NO built-in login yet — protected by Caddy basic_auth (user `olivier`) until real auth ships (see Issues)
 - Nightly backup: cron 03:15 pg_dump → /var/backups/gershoncrm (14-day retention)
 
+## 2026-11-16 — Streak copy v2
+- ✅ Pipelines + per-pipeline fields (TEXT/DROPDOWN/TAG/CHECKBOX/DATE/NUMBER) like Streak; values in deals.custom_fields
+- ✅ Box view: Notes (autosave), comments that save (edit/delete), timeline, stage, assignees, every field editable, add/rename/delete field, **Edit options** on any dropdown/tag
+- ✅ Grid: Streak stage funnel, grouped by stage, all fields as columns, inline edit, sort, search, New box
+- ✅ Boot no longer wipes & re-seeds the DB (data-loader seeds only an empty DB); PORT env honoured
+- ✅ Additive startup migration (server/migrate.ts) — no drops
+- ✅ POST /api/import/streak — idempotent Streak import (pipeline def + boxes + comments)
+- ❌ GC Pipeline data import (190 boxes) — pulled from Streak, posted to /api/import/streak
+- ⚠️ Repo is PUBLIC and attached_assets/ holds a Streak contacts export — make repo private
+
 ## ❌ Open
 
 - Implement real authentication (login UI + sessions + Google SSO) — Issue #2
-- loadInitialData() re-seeds on every restart; PORT hardcoded to 5000 — Issue #3
 - Multi-tenancy refactor before external clients
 - CI/CD push-to-deploy (GitHub Actions → VPS) not yet wired; deploys are `git pull && docker compose build app && docker compose up -d app` in /opt/gershoncrm
 
