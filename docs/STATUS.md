@@ -4,7 +4,7 @@
 
 ## ✅ LIVE at https://crm.gershon.ai
 
-Deployed 2026-11-10 on the existing Hostinger VPS (srv1511567, 187.124.235.148) — the original Phase 0–9 runbook (docs/DEPLOY.md) was superseded by a simpler route on Olivier's decision:
+Deployed 2026-11-10, Streak copy v2 deployed 2026-11-17 on the existing Hostinger VPS (srv1511567, 187.124.235.148) — the original Phase 0–9 runbook (docs/DEPLOY.md) was superseded by a simpler route on Olivier's decision:
 
 - Docker Compose at `/opt/gershoncrm` (app container + postgres:16, volume `dbdata`), app on 127.0.0.1:5001
 - Caddy (already on the VPS) terminates TLS for `crm.gershon.ai` (auto Let's Encrypt) — no nginx/certbot
@@ -21,7 +21,10 @@ Deployed 2026-11-10 on the existing Hostinger VPS (srv1511567, 187.124.235.148) 
 - ✅ Boot no longer wipes & re-seeds the DB (data-loader seeds only an empty DB); PORT env honoured
 - ✅ Additive startup migration (server/migrate.ts) — no drops
 - ✅ POST /api/import/streak — idempotent Streak import (pipeline def + boxes + comments)
-- ❌ GC Pipeline data import (190 boxes) — pulled from Streak, posted to /api/import/streak
+- ✅ LIVE 2026-11-17 (PR #2 deployed; DB backup /var/backups/gershoncrm/pre-streak-v2-*.sql.gz)
+- ✅ GC Pipeline imported live: 192 boxes, 9 stages, 24 fields, 107 comments (snapshot of Streak on 2026-11-16; not a live sync)
+- ❌ Ongoing Streak→CRM sync (only a one-time import so far)
+- ❌ Box timeline has no Streak emails (Streak API doesn't expose email bodies to the import)
 - ⚠️ Repo is PUBLIC and attached_assets/ holds a Streak contacts export — make repo private
 
 ## ❌ Open
