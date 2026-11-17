@@ -2,9 +2,11 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { loadInitialData } from "./data-loader";
+import { runMigrations } from "./migrate";
+import { adoptLegacyMabsilico } from "./legacy-adopt";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
@@ -39,12 +41,21 @@ app.use((req, res, next) => {
 
 (async () => {
   try {
-    // Load initial data from CSV files
-    log("Loading initial data from CSV files...");
+    await runMigrations();
+    log("Schema migrations applied");
+  } catch (error) {
+    log(`Migration error: ${error}`);
+  }
+  try {
     const result = await loadInitialData();
-    log(`Successfully loaded initial data: ${result.stages} stages, ${result.contacts} contacts, ${result.deals} deals`);
+    log(`Initial data: ${JSON.stringify(result)}`);
   } catch (error) {
     log(`Error loading initial data: ${error}`);
+  }
+  try {
+    await adoptLegacyMabsilico();
+  } catch (error) {
+    log(`Legacy adoption error: ${error}`);
   }
 
   const server = await registerRoutes(app);
@@ -69,7 +80,7 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
-  const port = 5000;
+  const port = parseInt(process.env.PORT || "5000", 10);
   server.listen({
     port,
     host: "0.0.0.0",

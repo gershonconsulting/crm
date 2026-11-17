@@ -8,7 +8,16 @@ import { InsertContact, InsertDeal, InsertDealStage } from '@shared/schema';
 /**
  * Loads initial data from CSV files into the database
  */
-export async function loadInitialData() {
+export async function loadInitialData(opts: { force?: boolean } = {}) {
+  // Seed ONLY an empty database. (Before 2026-11-16 this wiped and re-seeded every boot,
+  // throwing away every change made in the CRM on each restart.)
+  if (!opts.force) {
+    const existing = await db.select({ id: deals.id }).from(deals).limit(1);
+    if (existing.length > 0) {
+      console.log("Deals already present — skipping CSV seed.");
+      return { stages: 0, contacts: 0, deals: 0, skipped: true };
+    }
+  }
   console.log("Starting to load initial data from CSV files...");
   
   try {
