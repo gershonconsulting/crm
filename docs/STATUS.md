@@ -1,6 +1,6 @@
 # GershonCRM — Status
 
-**Last updated:** 2026-11-16 (Claude) — Streak copy v2 (branch feat/streak-copy)
+**Last updated:** 2026-11-18 (Claude) — PR #1 (pilot login) merged on top of Streak copy v2; NOT yet deployed
 
 ## ✅ LIVE at https://crm.gershon.ai
 
@@ -13,6 +13,13 @@ Deployed 2026-11-10, Streak copy v2 deployed 2026-11-17 on the existing Hostinge
 - Seeded: 10 stages, 2,095 contacts, 1,048 deals (Streak export CSVs); admin user `olivier` created
 - ⚠️ App has NO built-in login yet — protected by Caddy basic_auth (user `olivier`) until real auth ships (see Issues)
 - Nightly backup: cron 03:15 pg_dump → /var/backups/gershoncrm (14-day retention)
+
+## 2026-11-18 — PR #1 pilot login merged (not deployed)
+- ✅ Server-enforced password login + Postgres sessions (`server/auth.ts`), access limited to PILOT_ADMIN_EMAIL (default olivier@gershonconsulting.com, role admin)
+- ✅ Additive migration: `users.google_subject`, `password_setup_tokens` (in server/migrate.ts); session table auto-created
+- ✅ Kept #2/#3 Streak grid/BoxDialog and guarded seed loader; HOST defaults 0.0.0.0 (Docker), TRUST_PROXY env
+- ❌ Before redeploy: set APP_URL + TRUST_PROXY in /opt/gershoncrm compose, make sure the admin user's email is the pilot email and has a password (`npm run admin:create` / setup link)
+- ⚠️ Keep Caddy basic_auth until login is verified live
 
 ## 2026-11-16 — Streak copy v2
 - ✅ Pipelines + per-pipeline fields (TEXT/DROPDOWN/TAG/CHECKBOX/DATE/NUMBER) like Streak; values in deals.custom_fields
@@ -38,4 +45,4 @@ Deployed 2026-11-10, Streak copy v2 deployed 2026-11-17 on the existing Hostinge
 SSH to VPS → `cd /opt/gershoncrm/src && git pull && cd .. && docker compose build app && docker compose up -d app`.
 Caddy config: `/etc/caddy/Caddyfile` (crm.gershon.ai block). Secrets: `/opt/gershoncrm/.env` + 1Password.
 
-Historical docs: `docs/DEPLOY.md`, `docs/ARIEL_MISSION.md`, `docs/CHARLES_MISSION.md`, `docs/CHARLES_DNS_FIX.md` (gershoncrm.com/Tierra path — no longer the plan), `docs/AGENTS.md`.
+Historical docs: `docs/DEPLOY.md`, `docs/ARIEL_MISSION.md`, `docs/CHARLES_DNS_FIX.md` (gershoncrm.com/Tierra path — no longer the plan), `docs/AGENTS.md`.

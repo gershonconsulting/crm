@@ -26,6 +26,9 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgres://gershoncrm_app:${DB_PASSWORD}@db:5432/gershoncrm
       SESSION_SECRET: ${SESSION_SECRET}
+      # PR #1 login: Caddy reaches the container over the Docker bridge, so trust private-range proxies.
+      APP_URL: https://crm.gershon.ai
+      TRUST_PROXY: uniquelocal
     ports:
       - "127.0.0.1:5001:5000"
 volumes:
