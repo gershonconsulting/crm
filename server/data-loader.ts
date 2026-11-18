@@ -148,7 +148,7 @@ export async function loadInitialData(opts: { force?: boolean } = {}) {
       console.log(`Processing contacts batch ${i/BATCH_SIZE + 1}/${Math.ceil(contactsArray.length/BATCH_SIZE)}`);
       
       try {
-        const insertData = batch.map(contact => {
+        const insertData = batch.map((contact: any) => {
           const { _key, _boxKey, ...contactData } = contact;
           return contactData;
         });
@@ -222,7 +222,6 @@ export async function loadInitialData(opts: { force?: boolean } = {}) {
         assignedTo: record["Assigned To"] || "",
         boxKey: boxKey,
         tags: [],
-        createdAt: new Date() // Add the createdAt field
       };
       
       dealsToInsert.push(dealData);

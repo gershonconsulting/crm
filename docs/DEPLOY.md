@@ -1,10 +1,12 @@
+> Current pilot: see [STATUS.md](STATUS.md). Use password login, the existing VPS and crm.gershon.ai. Google organization registration is deferred. The private-pilot Phase 4 replaces the historical deploy-as-is assumptions below.
+
 # GershonCRM — Production Deploy Runbook
 
 > **Audience:** the deploy operator — Ariel (Claude Cowork) with Charles (Claude Chrome) for browser-GUI steps. Written so a human freelancer could also follow it.
-> **Goal:** Take the code from `main` → live at `https://crm.gershonCRM.com` with automated deploys on every push.
+> **Goal:** Take the code from `main` → live at `https://crm.gershon.ai` with automated deploys on every push.
 > **Time:** ~90 min end-to-end if nothing goes sideways.
 
-Operators: Ariel reads [`ARIEL_MISSION.md`](./ARIEL_MISSION.md) first; Charles reads [`CHARLES_MISSION.md`](./CHARLES_MISSION.md) — it defines who does what. [`HANDOFF.md`](./HANDOFF.md) has the project background.
+Claude Cowork starts with [COWORK_HANDOFF.md](COWORK_HANDOFF.md), then the numbered phase references. Historical operator references: Ariel reads [`ARIEL_MISSION.md`](./ARIEL_MISSION.md) first; Charles reads [`CHARLES_MISSION.md`](./CHARLES_MISSION.md) — it defines who does what. [`HANDOFF.md`](./HANDOFF.md) has the project background.
 
 ---
 
@@ -13,7 +15,7 @@ Operators: Ariel reads [`ARIEL_MISSION.md`](./ARIEL_MISSION.md) first; Charles r
 | Layer           | Tech                                             |
 | --------------- | ------------------------------------------------ |
 | Frontend        | React 18 + Vite + TypeScript + Tailwind          |
-| Backend         | Node.js 20 + Express + Drizzle ORM               |
+| Backend         | Node.js 24 + Express + Drizzle ORM               |
 | Database        | PostgreSQL 16 (local on the VPS)                 |
 | Process manager | PM2                                              |
 | Reverse proxy   | nginx                                            |
@@ -32,8 +34,8 @@ GershonCRM is a **standalone** Streak.com-style CRM. It is explicitly **not** in
 
 1. **VPS public IP** (provisioned by Olivier in his Hostinger account — KVM 2, Ubuntu 22.04/24.04, NY datacenter)
 2. **VPS root password** (single-use — replaced by SSH key auth in Phase 1)
-3. **Cloudflare access** to the `gershonCRM.com` zone (for Charles/browser steps)
-4. **GitHub PAT** with `repo` + `workflow` scope for `gershonconsulting/gershonCRM` (90-day expiry)
+3. **Cloudflare access** to the `gershon.ai` zone (for Charles/browser steps)
+4. **GitHub PAT** with `repo` + `workflow` scope for `gershonconsulting/crm` (90-day expiry)
 5. **OPENAI_API_KEY** — used by the AI features in the CRM
 
 Do not proceed past Phase 0 until all five are in the vault.
@@ -46,10 +48,10 @@ Do not proceed past Phase 0 until all five are in the vault.
 |---|-------|------|----------|----------|
 | 0 | Pre-flight checks | 5 min | Ariel | Confirmed prereqs |
 | 1 | VPS bootstrap & hardening | 15 min | Ariel | Non-root sudo user, firewall, SSH keys |
-| 2 | Install runtime | 10 min | Ariel | Node 20, Postgres 16, nginx, PM2, certbot |
+| 2 | Install runtime | 10 min | Ariel | Node 24, Postgres 16, nginx, PM2, certbot |
 | 3 | Database setup | 5 min | Ariel | `gershoncrm` DB + app user |
 | 4 | Deploy app | 15 min | Ariel | App running on `127.0.0.1:5000` via PM2 |
-| 5 | Cloudflare DNS (proxy OFF) | 5 min | **Charles** | `crm.gershonCRM.com` → VPS IP |
+| 5 | Cloudflare DNS (proxy OFF) | 5 min | **Charles** | `crm.gershon.ai` → VPS IP |
 | 6 | nginx + SSL | 10 min | Ariel | HTTPS live via Let's Encrypt |
 | 7 | Cloudflare proxy ON | 5 min | **Charles** | Orange cloud, Full (strict) SSL |
 | 8 | GitHub Actions auto-deploy | 10 min | Ariel + **Charles** (Secrets UI) | Push to `main` → auto-redeploy |
@@ -63,7 +65,7 @@ Sub-documents live in `docs/deploy/` — one per phase, each with exit criteria 
 
 - [ ] All 5 prereqs are in the 1Password vault.
 - [ ] SSH works: `ssh root@<VPS_IP>` with the root password gives a shell.
-- [ ] `gershonCRM.com` is on Cloudflare: `dig NS gershoncrm.com +short` returns two `*.ns.cloudflare.com` hosts. Anything else → **stop and tell Olivier**.
+- [ ] `gershon.ai` is on Cloudflare: `dig NS gershon.ai +short` returns two `*.ns.cloudflare.com` hosts. Anything else → **stop and tell Olivier**.
 
 ---
 
@@ -73,15 +75,11 @@ Follow the numbered files in [`deploy/`](./deploy/) in order. Every phase ends w
 
 ---
 
-## Known issues to fix post-launch (file as GitHub Issues in Phase 9, not blocking)
+## Current release gates
 
-1. **`server/index.ts` runs `loadInitialData()` on every restart** — re-seeds DB from CSVs in `attached_assets/`. Fine for first deploy (gives us data to dogfood). Fix: gate behind `LOAD_INITIAL_DATA=true` env var.
-2. **Port hardcoded to 5000** in `server/index.ts`. Should read `process.env.PORT`. Low priority — nginx proxies to 5000 anyway.
-3. **No `/api/health` endpoint** — add one returning 200 + DB ping for uptime monitoring.
-4. **No multi-tenancy** — every user shares one workspace. The big product refactor before onboarding external clients. Track separately.
-5. **Session store is in-memory (`memorystore`)** — sessions wipe on every deploy. Move to `connect-pg-simple` (already in package.json).
+Automatic CSV replacement, environment loading, local PostgreSQL compatibility, API authentication and session persistence have been addressed in the local pilot changes. Verify them on the actual VPS before marking deployment complete.
 
----
+Remaining gates: obtain the exact GC pipeline data and field definitions; validate the imported copy; configure the new hostname and TLS; create Olivier's administrator interactively; verify password login and saved data through a restart. No other users may enter until per-pipeline isolation and assignments are implemented.
 
 ## When things go wrong
 

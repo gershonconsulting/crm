@@ -36,6 +36,17 @@ export async function runMigrations() {
     `CREATE INDEX IF NOT EXISTS deals_box_key_idx ON deals (box_key)`,
     `CREATE INDEX IF NOT EXISTS deals_pipeline_idx ON deals (pipeline_id)`,
     `CREATE INDEX IF NOT EXISTS activities_deal_idx ON activities (deal_id)`,
+    // Pilot login (PR #1): additive only.
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS google_subject TEXT`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS users_google_subject_unique ON users (google_subject)`,
+    `CREATE TABLE IF NOT EXISTS password_setup_tokens (
+       id SERIAL PRIMARY KEY,
+       user_id INTEGER NOT NULL,
+       token_hash TEXT NOT NULL UNIQUE,
+       expires_at TIMESTAMP NOT NULL,
+       used_at TIMESTAMP,
+       created_at TIMESTAMP NOT NULL DEFAULT NOW()
+     )`,
   ];
   for (const sql of statements) {
     await pool.query(sql);

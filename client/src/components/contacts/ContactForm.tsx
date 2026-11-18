@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { 
-  Dialog, 
-  DialogContent, 
+import {
+  Dialog,
+  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -42,7 +42,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isEditing = !!contact;
-  
+
   // State for country and city
   const [selectedCountry, setSelectedCountry] = useState(contact?.country || '');
   const [selectedCity, setSelectedCity] = useState(contact?.city || '');
@@ -90,12 +90,12 @@ const ContactForm: React.FC<ContactFormProps> = ({
     },
   });
 
-  // Effect to update form values when country/city change 
+  // Effect to update form values when country/city change
   useEffect(() => {
     form.setValue('country', selectedCountry);
     form.setValue('city', selectedCity);
   }, [selectedCountry, selectedCity, form]);
-  
+
   // Mutation for creating/updating contact
   const contactMutation = useMutation({
     mutationFn: async (values: z.infer<typeof formSchema>) => {
@@ -133,7 +133,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Contact' : 'Add New Contact'}</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -144,13 +144,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="First name" {...field} />
+                      <Input placeholder="First name" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="lastName"
@@ -158,14 +158,14 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Last name" {...field} />
+                      <Input placeholder="Last name" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
+
             <FormField
               control={form.control}
               name="name"
@@ -173,13 +173,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <FormItem>
                   <FormLabel>Full Name (Display Name)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Full name" {...field} />
+                    <Input placeholder="Full name" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -188,13 +188,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>Company</FormLabel>
                     <FormControl>
-                      <Input placeholder="Company name" {...field} />
+                      <Input placeholder="Company name" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="position"
@@ -202,14 +202,14 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>Role</FormLabel>
                     <FormControl>
-                      <Input placeholder="Job title / Position" {...field} />
+                      <Input placeholder="Job title / Position" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -217,13 +217,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="Email address" {...field} />
+                    <Input type="email" placeholder="Email address" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-              
+
             <FormField
               control={form.control}
               name="phone"
@@ -231,13 +231,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
-                    <Input placeholder="Phone number" {...field} />
+                    <Input placeholder="Phone number" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="location"
@@ -245,13 +245,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
-                    <Input placeholder="Address Line" {...field} />
+                    <Input placeholder="Address Line" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="border p-4 rounded-md">
               <div className="text-sm font-medium mb-2">Location Details</div>
               <CountryCitySelect
@@ -261,7 +261,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 onCityChange={setSelectedCity}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -270,13 +270,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>Twitter</FormLabel>
                     <FormControl>
-                      <Input placeholder="Twitter handle" {...field} />
+                      <Input placeholder="Twitter handle" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="linkedIn"
@@ -284,14 +284,14 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>LinkedIn</FormLabel>
                     <FormControl>
-                      <Input placeholder="LinkedIn profile URL" {...field} />
+                      <Input placeholder="LinkedIn profile URL" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -300,13 +300,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>Facebook</FormLabel>
                     <FormControl>
-                      <Input placeholder="Facebook profile" {...field} />
+                      <Input placeholder="Facebook profile" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="instagram"
@@ -314,14 +314,14 @@ const ContactForm: React.FC<ContactFormProps> = ({
                   <FormItem>
                     <FormLabel>Instagram</FormLabel>
                     <FormControl>
-                      <Input placeholder="Instagram handle" {...field} />
+                      <Input placeholder="Instagram handle" {...field} value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
+
             <FormField
               control={form.control}
               name="website"
@@ -329,13 +329,13 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <FormItem>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
-                    <Input placeholder="Website URL" {...field} />
+                    <Input placeholder="Website URL" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="notes"
@@ -343,17 +343,17 @@ const ContactForm: React.FC<ContactFormProps> = ({
                 <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Additional information" 
-                      className="resize-none" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Additional information"
+                      className="resize-none"
+                      {...field} value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel

@@ -1,73 +1,12 @@
-# Phase 9 — Smoke Test & Handoff
+# Phase 9 — private-pilot acceptance
 
-**Time:** 10 min. **Operator:** Ariel.
+1. Verify https://crm.gershon.ai loads the password sign-in page and anonymous API requests return 401.
+2. Use npm run admin:create in an interactive VPS terminal to create olivier@gershonconsulting.com if it does not already exist. Password prompts are hidden; save credentials in 1Password. No credentials belong in chat or commits.
+3. Sign in as Olivier. Confirm other accounts remain denied even if they have been provisioned in Admin.
+4. Check stage creation, stage editing/reordering, contact creation/editing, a zero-value deal, changing a deal's stage, note saving, completion checkboxes, search, and dated tasks. Delete only the explicitly created test records.
+5. After the GC source is available, compare imported source keys, stages, custom fields, contact associations and row counts with the exact Streak pipeline in ../STATUS.md. Report any activity-history or attachment exclusions. Do not use the old MAbSilico export as the GC pipeline.
+6. Restart PM2. Confirm contacts, deals, tasks and the current session persist. Confirm logout invalidates the session.
+7. Install encrypted or access-restricted nightly PostgreSQL backups, verify a backup, and test restoration to a separate database. Keep Streak available until the imported copy is accepted. Offsite backups remain a deployment requirement to settle before relying on this CRM.
+8. Enable the deployment workflow only after the existing VPS and its service paths have been verified. Prove a successful deploy and health check.
 
-## 9.1 First admin user
-
-**Option A (preferred):** register via the UI as `olivier@gershonconsulting.com` (generate a strong password → 1Password as "GershonCRM Olivier admin"), then promote:
-
-```bash
-psql -U gershoncrm_app -d gershoncrm -h localhost -W
-```
-```sql
-UPDATE users SET role = 'admin' WHERE email = 'olivier@gershonconsulting.com';
-```
-
-**Option B (if registration is broken):** check `server/auth-utils.ts` for the hash scheme (it uses scrypt `salt:hash`), generate a hash with Node matching that exact format, INSERT the user row directly. Match the code, don't guess.
-
-## 9.2 Smoke checklist
-
-- [ ] Login → redirects to pipeline
-- [ ] Kanban loads
-- [ ] Create a contact; create a deal; drag deal between stages
-- [ ] Create a task linked to a contact
-- [ ] Dashboard stats render
-- [ ] Settings + `/adminpanel` load
-- [ ] Logout works
-- Delete the test records after.
-
-## 9.3 Verify CSV data import
-
-`loadInitialData()` runs at startup and imports the Streak CSVs from `attached_assets/`, so data should already be in:
-
-```sql
-SELECT COUNT(*) FROM contacts;
-SELECT COUNT(*) FROM deals;
-SELECT COUNT(*) FROM deal_stages;
-```
-
-Zeros → check `pm2 logs gershoncrm --lines 200 | grep -i "initial data"`.
-
-## 9.4 Nightly backup
-
-```bash
-mkdir -p ~/backups
-cat > ~/backup-db.sh <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-STAMP=$(date +%Y%m%d-%H%M%S)
-export PGPASSWORD='<DB_PW>'
-pg_dump -U gershoncrm_app -h localhost -d gershoncrm | gzip > ~/backups/gershoncrm-$STAMP.sql.gz
-find ~/backups -name "gershoncrm-*.sql.gz" -mtime +14 -delete
-EOF
-chmod 700 ~/backup-db.sh
-~/backup-db.sh && ls -la ~/backups/          # test run
-(crontab -l 2>/dev/null; echo "0 3 * * * /home/deploy/backup-db.sh") | crontab -
-```
-
-Local-only for now; offsite sync (rclone → B2/Drive) is a post-launch item — mention it in the handoff.
-
-## 9.5 File the 5 known issues
-
-On GitHub, one Issue each (details in `docs/DEPLOY.md` § Known issues):
-1. Gate `loadInitialData()` behind env var
-2. Read PORT from env
-3. Add `/api/health` endpoint
-4. Multi-tenancy: `workspace_id` on all tables
-5. Session store → `connect-pg-simple`
-
-## 9.6 Handoff report to Olivier
-
-Site URL + confirmation live · admin credentials location in 1Password · row counts · Actions run link · issues links · backup confirmation · `EXECUTION_LOG.md` committed.
-
-Final commit: `git commit -am "deploy: phase 9 complete - handoff" && git push`
+Record actual evidence in EXECUTION_LOG.md. Do not mark any item complete based only on local tests. Google organization registration and Google sign-in activation remain deferred.

@@ -60,8 +60,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteContact(id: number): Promise<boolean> {
-    await db.delete(contacts).where(eq(contacts.id, id));
-    return true;
+    const [linked] = await db.select({ id: deals.id }).from(deals).where(eq(deals.contactId, id)).limit(1);
+    if (linked) throw new Error('Reassign linked deals before deleting this contact');
+    return db.transaction(async tx => {
+      await tx.delete(tasks).where(eq(tasks.contactId, id));
+      await tx.delete(activities).where(eq(activities.contactId, id));
+      return (await tx.delete(contacts).where(eq(contacts.id, id)).returning({ id: contacts.id })).length > 0;
+    });
   }
 
   // Deal Stages
@@ -89,8 +94,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDealStage(id: number): Promise<boolean> {
-    await db.delete(dealStages).where(eq(dealStages.id, id));
-    return true;
+    const [linked] = await db.select({ id: deals.id }).from(deals).where(eq(deals.stageId, id)).limit(1);
+    if (linked) throw new Error('Move deals out of this stage before deleting it');
+    return (await db.delete(dealStages).where(eq(dealStages.id, id)).returning({ id: dealStages.id })).length > 0;
   }
 
   // Deals
@@ -102,8 +108,8 @@ export class DatabaseStorage implements IStorage {
         stage: dealStages
       })
       .from(deals)
-      .leftJoin(contacts, eq(deals.contactId, contacts.id))
-      .leftJoin(dealStages, eq(deals.stageId, dealStages.id))
+      .innerJoin(contacts, eq(deals.contactId, contacts.id))
+      .innerJoin(dealStages, eq(deals.stageId, dealStages.id))
       .orderBy(desc(deals.createdAt));
 
     return result.map(({ deal, contact, stage }) => ({
@@ -121,8 +127,8 @@ export class DatabaseStorage implements IStorage {
         stage: dealStages
       })
       .from(deals)
-      .leftJoin(contacts, eq(deals.contactId, contacts.id))
-      .leftJoin(dealStages, eq(deals.stageId, dealStages.id))
+      .innerJoin(contacts, eq(deals.contactId, contacts.id))
+      .innerJoin(dealStages, eq(deals.stageId, dealStages.id))
       .where(eq(deals.id, id));
 
     if (!result) return undefined;
@@ -142,8 +148,8 @@ export class DatabaseStorage implements IStorage {
         stage: dealStages
       })
       .from(deals)
-      .leftJoin(contacts, eq(deals.contactId, contacts.id))
-      .leftJoin(dealStages, eq(deals.stageId, dealStages.id))
+      .innerJoin(contacts, eq(deals.contactId, contacts.id))
+      .innerJoin(dealStages, eq(deals.stageId, dealStages.id))
       .where(eq(deals.stageId, stageId))
       .orderBy(desc(deals.createdAt));
 
@@ -154,7 +160,29 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
+  async getDealsByStageAndMonth(stageId: number, month: string): Promise<DealWithContact[]> {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error("Month must use YYYY-MM");
+    const result = await this.getDealsByStage(stageId);
+    return result.filter(deal => new Date(deal.createdAt).toISOString().slice(0, 7) === month);
+  }
+
+  async reorderDealStage(id: number, direction: 'up' | 'down'): Promise<boolean> {
+    return db.transaction(async tx => {
+      const stages = await tx.select().from(dealStages).orderBy(dealStages.order, dealStages.id).for('update');
+      const index = stages.findIndex(stage => stage.id === id);
+      if (index < 0) return false;
+      const target = index + (direction === 'up' ? -1 : 1);
+      if (target < 0 || target >= stages.length) return true;
+      [stages[index], stages[target]] = [stages[target], stages[index]];
+      for (let i = 0; i < stages.length; i++) {
+        await tx.update(dealStages).set({ order: i + 1 }).where(eq(dealStages.id, stages[i].id));
+      }
+      return true;
+    });
+  }
+
   async createDeal(deal: InsertDeal): Promise<DealWithContact> {
+    if (!await this.getContact(deal.contactId) || !await this.getDealStage(deal.stageId)) throw new Error('Contact or stage not found');
     const [newDeal] = await db
       .insert(deals)
       .values({
@@ -166,6 +194,7 @@ export class DatabaseStorage implements IStorage {
     const contact = await this.getContact(newDeal.contactId);
     const stage = await this.getDealStage(newDeal.stageId);
 
+    if (!contact || !stage) throw new Error("Deal references a missing contact or stage");
     return {
       ...newDeal,
       contact,
@@ -174,6 +203,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateDeal(id: number, deal: Partial<InsertDeal>): Promise<DealWithContact | undefined> {
+    if (deal.contactId !== undefined && !await this.getContact(deal.contactId)) throw new Error('Contact not found');
+    if (deal.stageId !== undefined && !await this.getDealStage(deal.stageId)) throw new Error('Stage not found');
     const [updatedDeal] = await db
       .update(deals)
       .set(deal)
@@ -185,6 +216,7 @@ export class DatabaseStorage implements IStorage {
     const contact = await this.getContact(updatedDeal.contactId);
     const stage = await this.getDealStage(updatedDeal.stageId);
 
+    if (!contact || !stage) throw new Error("Deal references a missing contact or stage");
     return {
       ...updatedDeal,
       contact,
@@ -193,8 +225,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteDeal(id: number): Promise<boolean> {
-    await db.delete(deals).where(eq(deals.id, id));
-    return true;
+    return db.transaction(async tx => {
+      await tx.delete(tasks).where(eq(tasks.dealId, id));
+      await tx.delete(activities).where(eq(activities.dealId, id));
+      return (await tx.delete(deals).where(eq(deals.id, id)).returning({ id: deals.id })).length > 0;
+    });
   }
 
   // Tasks
@@ -212,8 +247,8 @@ export class DatabaseStorage implements IStorage {
 
     return result.map(({ task, contact, deal }) => ({
       ...task,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     }));
   }
 
@@ -233,8 +268,8 @@ export class DatabaseStorage implements IStorage {
     
     return {
       ...result.task,
-      contact: result.contact,
-      deal: result.deal
+      contact: result.contact ?? undefined,
+      deal: result.deal ?? undefined
     };
   }
 
@@ -253,8 +288,8 @@ export class DatabaseStorage implements IStorage {
 
     return result.map(({ task, contact, deal }) => ({
       ...task,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     }));
   }
 
@@ -273,8 +308,8 @@ export class DatabaseStorage implements IStorage {
 
     return result.map(({ task, contact, deal }) => ({
       ...task,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     }));
   }
 
@@ -292,8 +327,8 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...newTask,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     };
   }
 
@@ -311,8 +346,8 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...updatedTask,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     };
   }
 
@@ -336,8 +371,8 @@ export class DatabaseStorage implements IStorage {
 
     return result.map(({ activity, contact, deal }) => ({
       ...activity,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     }));
   }
 
@@ -357,8 +392,8 @@ export class DatabaseStorage implements IStorage {
     
     return {
       ...result.activity,
-      contact: result.contact,
-      deal: result.deal
+      contact: result.contact ?? undefined,
+      deal: result.deal ?? undefined
     };
   }
 
@@ -377,8 +412,8 @@ export class DatabaseStorage implements IStorage {
 
     return result.map(({ activity, contact, deal }) => ({
       ...activity,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     }));
   }
 
@@ -397,8 +432,8 @@ export class DatabaseStorage implements IStorage {
 
     return result.map(({ activity, contact, deal }) => ({
       ...activity,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     }));
   }
 
@@ -416,8 +451,8 @@ export class DatabaseStorage implements IStorage {
 
     return {
       ...newActivity,
-      contact,
-      deal
+      contact: contact ?? undefined,
+      deal: deal ?? undefined
     };
   }
 

@@ -1,0 +1,35 @@
+# Copied to /opt/gershoncrm-pilot by install.sh; the repo checkout lives in ./src.
+# Runs beside the older /opt/gershoncrm stack, which is left untouched as rollback.
+name: gershoncrm-pilot
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gershoncrm
+      POSTGRES_USER: gershoncrm_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?run install.sh to create .env}
+    volumes:
+      - pilotdb:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gershoncrm_app -d gershoncrm"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  app:
+    build:
+      context: ./src
+      dockerfile: deploy/pilot/Dockerfile
+    image: gershoncrm-pilot-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # Host networking: Node binds 127.0.0.1:${PORT}, so only Caddy on this host reaches it,
+    # and Express sees Caddy as a loopback proxy (secure cookies work behind HTTPS).
+    network_mode: host
+    env_file: .env
+volumes:
+  pilotdb:

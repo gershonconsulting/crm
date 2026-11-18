@@ -6,18 +6,18 @@
 
 ## 7.1 Instruction block for Charles
 
-> Charles, in Cloudflare zone `gershonCRM.com`:
-> 1. **SSL/TLS → Overview** → set encryption mode to **Full (strict)** (origin has a valid Let's Encrypt cert).
-> 2. **SSL/TLS → Edge Certificates** → **Always Use HTTPS: ON**; **Minimum TLS Version: 1.2**; **Automatic HTTPS Rewrites: ON**.
+> Charles, in Cloudflare zone `gershon.ai`:
+> 1. Inspect the existing zone TLS policy. Use **Full (strict)** for `crm.gershon.ai` after its origin certificate is valid; preserve other hostnames' working settings. Use a hostname-specific rule when changing the zone default would affect other apps.
+> 2. Enforce HTTPS for this hostname in nginx. Preserve existing zone-wide settings unless their impact has been verified.
 > 3. **DNS → Records** → `crm` A record → click the grey cloud to turn it **orange (Proxied)**.
-> 4. Optional: Security → Bot Fight Mode ON; a cache-bypass rule for `crm.gershoncrm.com/api/*`.
+> 4. Optional: Security → Bot Fight Mode ON; a cache-bypass rule for `crm.gershon.ai/api/*`.
 > Report back when done.
 
 ## 7.2 Ariel verifies
 
 ```bash
-dig crm.gershoncrm.com +short     # now Cloudflare IPs (104.21.x / 172.67.x), NOT the VPS IP
-curl -I https://crm.gershoncrm.com  # 200/302 with header: server: cloudflare
+dig crm.gershon.ai +short     # now Cloudflare IPs (104.21.x / 172.67.x), NOT the VPS IP
+curl -I https://crm.gershon.ai  # 200/302 with header: server: cloudflare
 ```
 
 Browser check: page loads, DevTools shows `cf-ray` header, no redirect loop.

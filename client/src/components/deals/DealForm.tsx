@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  Dialog, 
-  DialogContent, 
+import {
+  Dialog,
+  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -47,7 +47,7 @@ const DealForm: React.FC<DealFormProps> = ({
 
   // Extend the schema with validation
   const formSchema = insertDealSchema.extend({
-    value: z.number().positive("Deal value must be positive"),
+    value: z.number().min(0, "Deal value cannot be negative"),
     name: z.string().min(2, "Name must be at least 2 characters"),
     contactId: z.number().positive("Contact is required"),
     stageId: z.number().positive("Stage is required"),
@@ -113,7 +113,7 @@ const DealForm: React.FC<DealFormProps> = ({
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Edit Deal' : 'Create New Deal'}</DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -123,13 +123,13 @@ const DealForm: React.FC<DealFormProps> = ({
                 <FormItem>
                   <FormLabel>Deal Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter deal name" {...field} />
+                    <Input placeholder="Enter deal name" {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -138,10 +138,10 @@ const DealForm: React.FC<DealFormProps> = ({
                   <FormItem>
                     <FormLabel>Value</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="Deal value" 
-                        {...field}
+                      <Input
+                        type="number"
+                        placeholder="Deal value"
+                        {...field} value={field.value ?? ""}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
@@ -149,14 +149,14 @@ const DealForm: React.FC<DealFormProps> = ({
                   </FormItem>
                 )}
               />
-              
+
               <FormField
                 control={form.control}
                 name="stageId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Stage</FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => field.onChange(Number(value))}
                       defaultValue={field.value.toString()}
                     >
@@ -178,14 +178,14 @@ const DealForm: React.FC<DealFormProps> = ({
                 )}
               />
             </div>
-            
+
             <FormField
               control={form.control}
               name="contactId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contact</FormLabel>
-                  <Select 
+                  <Select
                     onValueChange={(value) => field.onChange(Number(value))}
                     defaultValue={field.value.toString()}
                   >
@@ -206,7 +206,7 @@ const DealForm: React.FC<DealFormProps> = ({
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -214,17 +214,17 @@ const DealForm: React.FC<DealFormProps> = ({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter deal description" 
-                      className="resize-none" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Enter deal description"
+                      className="resize-none"
+                      {...field} value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="nextSteps"
@@ -232,17 +232,17 @@ const DealForm: React.FC<DealFormProps> = ({
                 <FormItem>
                   <FormLabel>Next Steps</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="E.g. Schedule demo, Send proposal" 
+                    <Textarea
+                      placeholder="E.g. Schedule demo, Send proposal"
                       className="resize-none"
-                      {...field} 
+                      {...field} value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel

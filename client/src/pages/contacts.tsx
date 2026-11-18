@@ -37,7 +37,7 @@ const ContactsPage: React.FC = () => {
   // Filter contacts by search query
   const filteredContacts = contacts.filter(contact => 
     contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    contact.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (contact.email || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
     (contact.company && contact.company.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 

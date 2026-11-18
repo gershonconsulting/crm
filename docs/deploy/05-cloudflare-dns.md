@@ -6,7 +6,7 @@
 
 ## 5.1 Instruction block for Charles
 
-> Charles: in the Cloudflare dashboard, zone `gershonCRM.com` → DNS → Records → Add record:
+> Inspect the existing `crm` records in the `gershon.ai` Cloudflare zone first. Preserve a rollback copy and resolve conflicting A/AAAA/CNAME records for this hostname only, then configure:
 > - Type: **A**
 > - Name: **crm**
 > - IPv4: **<VPS_IP>** (from 1Password "GershonCRM Deploy")
@@ -17,10 +17,10 @@
 ## 5.2 Ariel verifies
 
 ```bash
-dig crm.gershoncrm.com +short
+dig crm.gershon.ai +short
 # Expect: <VPS_IP>. Empty -> wait 60s, retry. Cloudflare IP (104.21.x / 172.67.x) -> proxy is ON, Charles must toggle it OFF.
 
-curl -I http://crm.gershoncrm.com
+curl -I http://crm.gershon.ai
 # Expect an nginx response (default page 200 or app response). "Connection refused" -> nginx down on VPS.
 ```
 

@@ -1,3 +1,5 @@
+> Historical brief for gershoncrm.com. The CRM pilot now targets crm.gershon.ai on the already-controlled gershon.ai zone. This nameserver migration is not required for the current CRM task. See STATUS.md.
+
 # CHARLES — FIX BRIEF: Move gershoncrm.com DNS to Cloudflare
 
 **From:** Olivier (via Ariel)

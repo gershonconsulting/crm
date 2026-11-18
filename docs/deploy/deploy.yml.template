@@ -24,16 +24,19 @@ jobs:
           command_timeout: 10m
           script: |
             set -euo pipefail
-            cd /var/www/gershonCRM
+            cd /var/www/crm
             echo "==> Pulling latest from main"
             git fetch --all
             git reset --hard origin/main
             echo "==> Installing deps"
             npm ci
             echo "==> Building"
+            npm run check
+            npm test
             npm run build
             echo "==> Restarting PM2"
             pm2 restart gershoncrm --update-env
             pm2 save
+            curl --fail --silent --show-error --retry 5 --retry-connrefused http://127.0.0.1:5000/health
             echo "==> Deploy complete"
             pm2 status

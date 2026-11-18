@@ -1,12 +1,14 @@
 import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, date, jsonb, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+const optionalDate = z.union([z.date(), z.string().datetime({ offset: true }).transform(value => new Date(value))]).nullish();
 
 // Users schema for authentication
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 255 }).notNull().unique(),
   password: text("password").notNull(),
+  googleSubject: text("google_subject").unique(),
   email: varchar("email", { length: 255 }).notNull(),
   firstName: text("first_name"),
   lastName: text("last_name"),
@@ -18,10 +20,22 @@ export const users = pgTable("users", {
   position: text("position"),
 });
 
+// One-time links that let the pilot administrator choose their own password.
+// Only a SHA-256 hash of each token is stored; tokens expire and are single use.
+export const passwordSetupTokens = pgTable("password_setup_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   lastLogin: true,
+  googleSubject: true,
 });
 
 // Contact schema based on MAbSilico's Streak data
@@ -55,7 +69,7 @@ export const contacts = pgTable("contacts", {
   customFields: jsonb("custom_fields"),
 });
 
-export const insertContactSchema = createInsertSchema(contacts).omit({
+export const insertContactSchema = createInsertSchema(contacts, { lastContactedAt: optionalDate }).omit({
   id: true,
   createdAt: true,
 });
@@ -114,7 +128,7 @@ export const deals = pgTable("deals", {
   updatedAt: timestamp("updated_at"),
 });
 
-export const insertDealSchema = createInsertSchema(deals).omit({
+export const insertDealSchema = createInsertSchema(deals, { lastContactedAt: optionalDate, lastEmailDate: optionalDate, nextTaskDueDate: optionalDate, closedAt: optionalDate }).omit({
   id: true,
   createdAt: true,
 });
@@ -136,7 +150,7 @@ export const tasks = pgTable("tasks", {
   category: text("category"), // For categorizing tasks
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).omit({
+export const insertTaskSchema = createInsertSchema(tasks, { dueDate: optionalDate, reminderDate: optionalDate }).omit({
   id: true,
   createdAt: true,
   completedAt: true,
@@ -190,6 +204,7 @@ export type PipelineField = typeof pipelineFields.$inferSelect;
 
 // Type definitions
 export type User = typeof users.$inferSelect;
+export type PublicUser = Omit<User, "password" | "googleSubject">;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type Contact = typeof contacts.$inferSelect;

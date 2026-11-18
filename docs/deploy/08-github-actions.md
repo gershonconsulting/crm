@@ -27,7 +27,7 @@ cat ~/.ssh/github_actions
 
 ## 8.2 Instruction block for Charles
 
-> Charles: GitHub → `gershonconsulting/gershonCRM` → Settings → Secrets and variables → Actions → New repository secret. Create three:
+> Charles: GitHub → `gershonconsulting/crm` → Settings → Secrets and variables → Actions → New repository secret. Create three:
 > | Name | Value |
 > |---|---|
 > | `VPS_HOST` | the VPS public IP (1Password) |

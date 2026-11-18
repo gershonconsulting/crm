@@ -1,8 +1,10 @@
+> Current direction (2026-11-06): see `STATUS.md`. Target crm.gershon.ai on the existing VPS; password login first, Google sign-in and company organization registration deferred. Historical phase instructions below require the current pilot checks before execution.
+
 # CHARLES — MISSION BRIEF: GershonCRM Deployment (Browser Operations)
 
 **From:** Olivier (via Claude CTO)
 **Agent:** Charles (Claude in Chrome)
-**Project:** GershonCRM — a Streak.com replica as a **standalone platform** (no Gmail integration). Deployment target: `https://crm.gershoncrm.com` on a Hostinger VPS.
+**Project:** GershonCRM — a Streak.com replica as a **standalone platform** (no Gmail integration). Deployment target: `https://crm.gershon.ai` on a Hostinger VPS.
 **Your role:** You own the **web-dashboard steps** of the deployment. Ariel (Cowork) owns all terminal/SSH work and will be executing `docs/DEPLOY.md` phases 0→9. Three of those phases require dashboard clicks that only you perform. Ariel will ping Olivier when she reaches each one; Olivier relays to you; you execute, verify, and report back so Ariel can continue.
 
 Background reading (skim, don't study): [`HANDOFF.md`](./HANDOFF.md) · [`DEPLOY.md`](./DEPLOY.md)
@@ -14,7 +16,7 @@ Background reading (skim, don't study): [`HANDOFF.md`](./HANDOFF.md) · [`DEPLOY
 ### TASK 1 — Cloudflare: create the DNS record, proxy OFF (deploy Phase 5)
 
 **Trigger:** Ariel reports Phase 4 complete (app running on the VPS).
-**Where:** https://dash.cloudflare.com → zone `gershoncrm.com` → **DNS** → **Records** → **Add record**
+**Where:** https://dash.cloudflare.com → zone `gershon.ai` → **DNS** → **Records** → **Add record**
 
 | Field | Value |
 |---|---|
@@ -36,7 +38,7 @@ Save.
 ### TASK 2 — Cloudflare: SSL settings + proxy ON (deploy Phase 7)
 
 **Trigger:** Ariel reports Phase 6 complete (HTTPS live on the origin via Let's Encrypt).
-**Where:** https://dash.cloudflare.com → zone `gershoncrm.com`
+**Where:** https://dash.cloudflare.com → zone `gershon.ai`
 
 Do these **in this exact order**:
 
@@ -49,9 +51,9 @@ Do these **in this exact order**:
 3. **DNS → Records** → find the `crm` A record → click the grey cloud → it turns **ORANGE (Proxied)**. Save.
 4. Optional hardening (do if the UI makes it quick, skip if any friction):
    - **Security → Bots** → Bot Fight Mode → ON
-   - A cache rule bypassing cache for `crm.gershoncrm.com/api/*`
+   - A cache rule bypassing cache for `crm.gershon.ai/api/*`
 
-**Verify before reporting done:** open https://crm.gershoncrm.com in a fresh tab — the login page loads, padlock valid, **no redirect-loop error**. If you see ERR_TOO_MANY_REDIRECTS: encryption mode is not Full (strict) — go back to step 1.
+**Verify before reporting done:** open https://crm.gershon.ai in a fresh tab — the login page loads, padlock valid, **no redirect-loop error**. If you see ERR_TOO_MANY_REDIRECTS: encryption mode is not Full (strict) — go back to step 1.
 **Report to Olivier:** "Phase 7 done — proxy ON, Full (strict), site loads through Cloudflare."
 
 ---
@@ -59,7 +61,7 @@ Do these **in this exact order**:
 ### TASK 3 — GitHub: create the three Actions secrets (deploy Phase 8)
 
 **Trigger:** Ariel reports she has generated the deploy SSH key and saved it to 1Password.
-**Where:** https://github.com/gershonconsulting/gershonCRM → **Settings** → **Secrets and variables** → **Actions** → **New repository secret** (three times)
+**Where:** https://github.com/gershonconsulting/crm → **Settings** → **Secrets and variables** → **Actions** → **New repository secret** (three times)
 
 | Secret name (exact, case-sensitive) | Value |
 |---|---|

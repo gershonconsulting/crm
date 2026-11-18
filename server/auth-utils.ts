@@ -1,4 +1,4 @@
-import { randomBytes, scrypt } from 'crypto';
+import { randomBytes, scrypt, timingSafeEqual } from 'crypto';
 import { promisify } from 'util';
 
 const scryptAsync = promisify(scrypt);
@@ -21,9 +21,10 @@ export async function hashPassword(password: string): Promise<string> {
  * @returns True if passwords match, false otherwise
  */
 export async function verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
+  if (!/^[a-f0-9]{128}\.[a-f0-9]{32}$/.test(hashedPassword)) return false;
   const [hashedPart, salt] = hashedPassword.split('.');
   const hashBuffer = Buffer.from(hashedPart, 'hex');
   const derivedKey = (await scryptAsync(plainPassword, salt, 64)) as Buffer;
   return hashBuffer.length === derivedKey.length && 
-    Buffer.compare(hashBuffer, derivedKey) === 0;
+    timingSafeEqual(hashBuffer, derivedKey);
 }
