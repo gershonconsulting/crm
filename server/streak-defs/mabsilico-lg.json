@@ -1,0 +1,625 @@
+{
+ "key": "agxzfm1haWxmb29nYWVyNwsSDE9yZ2FuaXphdGlvbiIQb2F0dGlhQGdtYWlsLmNvbQwLEghXb3JrZmxvdxiAgOqI26zZCAw",
+ "name": "MAbSilico - LG",
+ "stages": [
+  {
+   "key": "5007",
+   "name": "Lead",
+   "fg": "#FFFFFF",
+   "bg": "#e53935"
+  },
+  {
+   "key": "5001",
+   "name": "Contacted",
+   "fg": "#000000",
+   "bg": "#ff6f43"
+  },
+  {
+   "key": "5009",
+   "name": "Reconnect By GC",
+   "fg": "#000000",
+   "bg": "#fb8c00"
+  },
+  {
+   "key": "5002",
+   "name": "Call Scheduled",
+   "fg": "#000000",
+   "bg": "#ffa001"
+  },
+  {
+   "key": "5003",
+   "name": "Connected",
+   "fg": "#000000",
+   "bg": "#fcc106"
+  },
+  {
+   "key": "5005",
+   "name": "Engaged",
+   "fg": "#000000",
+   "bg": "#8bc34a"
+  },
+  {
+   "key": "5011",
+   "name": "Proposal Sent",
+   "fg": "#000000",
+   "bg": "#66bb6a"
+  },
+  {
+   "key": "5010",
+   "name": "WON",
+   "fg": "#FFFFFF",
+   "bg": "#43a047"
+  },
+  {
+   "key": "5008",
+   "name": "Later Stage",
+   "fg": "#FFFFFF",
+   "bg": "#01897b"
+  },
+  {
+   "key": "5006",
+   "name": "Recycled",
+   "fg": "#FFFFFF",
+   "bg": "#00695c"
+  }
+ ],
+ "fields": [
+  {
+   "key": "1001",
+   "name": "City",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9006",
+     "name": "Albany"
+    },
+    {
+     "key": "9008",
+     "name": "Boston"
+    },
+    {
+     "key": "9007",
+     "name": "Brooklyn"
+    },
+    {
+     "key": "9011",
+     "name": "Cambridge"
+    },
+    {
+     "key": "9005",
+     "name": "Houston"
+    },
+    {
+     "key": "9013",
+     "name": "Jakarta"
+    },
+    {
+     "key": "9001",
+     "name": "Los Angeles"
+    },
+    {
+     "key": "9004",
+     "name": "Montreal"
+    },
+    {
+     "key": "9010",
+     "name": "Munich"
+    },
+    {
+     "key": "9003",
+     "name": "New York"
+    },
+    {
+     "key": "9002",
+     "name": "San Diego"
+    },
+    {
+     "key": "9012",
+     "name": "San Francisco"
+    },
+    {
+     "key": "9014",
+     "name": "Tel Aviv"
+    },
+    {
+     "key": "9015",
+     "name": " Ellenwood"
+    },
+    {
+     "key": "9016",
+     "name": "Helsinki"
+    },
+    {
+     "key": "9017",
+     "name": "Shangai"
+    },
+    {
+     "key": "9018",
+     "name": "Canberra"
+    },
+    {
+     "key": "9019",
+     "name": "Budapest"
+    },
+    {
+     "key": "9020",
+     "name": "Bruxelles"
+    },
+    {
+     "key": "9021",
+     "name": "Vancouver"
+    },
+    {
+     "key": "9022",
+     "name": "Basel"
+    },
+    {
+     "key": "9023",
+     "name": "Vienna"
+    },
+    {
+     "key": "9024",
+     "name": "philadelphia"
+    },
+    {
+     "key": "9025",
+     "name": "Paris"
+    },
+    {
+     "key": "9026",
+     "name": "Baltimore-Washington"
+    },
+    {
+     "key": "9027",
+     "name": "Ann Arbor"
+    },
+    {
+     "key": "9028",
+     "name": "Potomac "
+    },
+    {
+     "key": "9029",
+     "name": "Greater Cambridge "
+    },
+    {
+     "key": "9030",
+     "name": "Greater Szeged Area"
+    },
+    {
+     "key": "9031",
+     "name": "Cayucos"
+    },
+    {
+     "key": "9032",
+     "name": "Newark"
+    },
+    {
+     "key": "9033",
+     "name": "Copenhagen"
+    },
+    {
+     "key": "9034",
+     "name": "Saarbrücken"
+    },
+    {
+     "key": "9035",
+     "name": "Sherbrooke, Quebec, Canada"
+    },
+    {
+     "key": "9036",
+     "name": "Netherlands"
+    },
+    {
+     "key": "9037",
+     "name": "Melbourne"
+    },
+    {
+     "key": "9038",
+     "name": "Greater Melbourne"
+    }
+   ]
+  },
+  {
+   "key": "1002",
+   "name": "Source",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "Emailing"
+    },
+    {
+     "key": "9002",
+     "name": "Messaging"
+    }
+   ]
+  },
+  {
+   "key": "1003",
+   "name": "Interest",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "High"
+    },
+    {
+     "key": "9002",
+     "name": "Medium"
+    },
+    {
+     "key": "9003",
+     "name": "Low"
+    }
+   ]
+  },
+  {
+   "key": "1004",
+   "name": "Fit",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "High"
+    },
+    {
+     "key": "9002",
+     "name": "Medium"
+    },
+    {
+     "key": "9003",
+     "name": "Low"
+    }
+   ]
+  },
+  {
+   "key": "1005",
+   "name": "Done",
+   "type": "CHECKBOX"
+  },
+  {
+   "key": "1006",
+   "name": "State",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "California"
+    },
+    {
+     "key": "9002",
+     "name": "Florida"
+    },
+    {
+     "key": "9003",
+     "name": "Kentucky"
+    },
+    {
+     "key": "9004",
+     "name": "Nevada"
+    },
+    {
+     "key": "9005",
+     "name": "Washington"
+    },
+    {
+     "key": "9006",
+     "name": "Arizona"
+    },
+    {
+     "key": "9007",
+     "name": "Kansas"
+    },
+    {
+     "key": "9008",
+     "name": "Virginie"
+    },
+    {
+     "key": "9009",
+     "name": "New York"
+    },
+    {
+     "key": "9010",
+     "name": "Massachusetts"
+    },
+    {
+     "key": "9011",
+     "name": "germany"
+    },
+    {
+     "key": "9012",
+     "name": "South Korea"
+    },
+    {
+     "key": "9013",
+     "name": "Alabama"
+    },
+    {
+     "key": "9014",
+     "name": "Belglium"
+    },
+    {
+     "key": "9015",
+     "name": "Belgium"
+    },
+    {
+     "key": "9016",
+     "name": "indonesia"
+    },
+    {
+     "key": "9017",
+     "name": "New Jersey"
+    },
+    {
+     "key": "9018",
+     "name": "Georgia"
+    },
+    {
+     "key": "9019",
+     "name": "india"
+    },
+    {
+     "key": "9020",
+     "name": "Maryland"
+    },
+    {
+     "key": "9021",
+     "name": "Michigan"
+    },
+    {
+     "key": "9022",
+     "name": "Delaware"
+    },
+    {
+     "key": "9023",
+     "name": "Capital Region of Denmark"
+    },
+    {
+     "key": "9024",
+     "name": "Saarland"
+    },
+    {
+     "key": "9025",
+     "name": "Netherlands"
+    },
+    {
+     "key": "9026",
+     "name": "Victoria"
+    }
+   ]
+  },
+  {
+   "key": "1007",
+   "name": "Thread",
+   "type": "TEXT_INPUT"
+  },
+  {
+   "key": "1008",
+   "name": "Type",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9004",
+     "name": "Antibody"
+    },
+    {
+     "key": "9002",
+     "name": "Chemistry"
+    },
+    {
+     "key": "9005",
+     "name": "AI/ML technology"
+    },
+    {
+     "key": "9006",
+     "name": "Target Discovery"
+    },
+    {
+     "key": "9007",
+     "name": "Software"
+    }
+   ]
+  },
+  {
+   "key": "1009",
+   "name": "Persona",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "Coach/Champion"
+    },
+    {
+     "key": "9002",
+     "name": "Scientific buyer"
+    },
+    {
+     "key": "9003",
+     "name": "Technology buyer"
+    },
+    {
+     "key": "9004",
+     "name": "Financial buyer"
+    },
+    {
+     "key": "9005",
+     "name": "Not decision maker"
+    }
+   ]
+  },
+  {
+   "key": "1011",
+   "name": "Category",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "Client"
+    },
+    {
+     "key": "9002",
+     "name": "Partner"
+    },
+    {
+     "key": "9004",
+     "name": "Competitor"
+    },
+    {
+     "key": "9005",
+     "name": "Consultant"
+    },
+    {
+     "key": "9006",
+     "name": "Investor"
+    }
+   ]
+  },
+  {
+   "key": "1013",
+   "name": "Next Steps",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "Reset LinkedIn"
+    },
+    {
+     "key": "9002",
+     "name": "Schedule Call"
+    },
+    {
+     "key": "9003",
+     "name": "Send Proposal"
+    },
+    {
+     "key": "9004",
+     "name": "Schedule Demo"
+    },
+    {
+     "key": "9005",
+     "name": "Waiting for feedback"
+    },
+    {
+     "key": "9006",
+     "name": "Stand by"
+    },
+    {
+     "key": "9007",
+     "name": "Send Calendly"
+    },
+    {
+     "key": "9008",
+     "name": "Get email address"
+    }
+   ]
+  },
+  {
+   "key": "1015",
+   "name": "Country",
+   "type": "DROPDOWN",
+   "options": [
+    {
+     "key": "9001",
+     "name": "South Korea"
+    },
+    {
+     "key": "9002",
+     "name": "Indonesia"
+    },
+    {
+     "key": "9003",
+     "name": "Germany"
+    },
+    {
+     "key": "9004",
+     "name": "USA"
+    },
+    {
+     "key": "9005",
+     "name": "Israel"
+    },
+    {
+     "key": "9006",
+     "name": "Finland"
+    },
+    {
+     "key": "9007",
+     "name": "China"
+    },
+    {
+     "key": "9008",
+     "name": "Australia"
+    },
+    {
+     "key": "9009",
+     "name": "Hungria"
+    },
+    {
+     "key": "9010",
+     "name": "Belgium"
+    },
+    {
+     "key": "9011",
+     "name": "Canada"
+    },
+    {
+     "key": "9012",
+     "name": "Switzerland"
+    },
+    {
+     "key": "9013",
+     "name": "Austria"
+    },
+    {
+     "key": "9014",
+     "name": "india"
+    },
+    {
+     "key": "9016",
+     "name": "France"
+    },
+    {
+     "key": "9017",
+     "name": "Turkey"
+    },
+    {
+     "key": "9018",
+     "name": "Greece"
+    },
+    {
+     "key": "9019",
+     "name": "Pakistan"
+    },
+    {
+     "key": "9020",
+     "name": "Italy"
+    },
+    {
+     "key": "9021",
+     "name": "Taiwan"
+    },
+    {
+     "key": "9022",
+     "name": "United Kingdom "
+    },
+    {
+     "key": "9023",
+     "name": "Hungary"
+    },
+    {
+     "key": "9024",
+     "name": "Denmark"
+    },
+    {
+     "key": "9025",
+     "name": "Netherlands"
+    }
+   ]
+  },
+  {
+   "key": "1017",
+   "name": "Value",
+   "type": "TEXT_INPUT"
+  }
+ ]
+}

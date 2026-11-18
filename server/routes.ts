@@ -22,6 +22,7 @@ import { publicUser } from './access-policy';
 import { importContactsFromCSV, importDealsFromCSV, importCombinedData } from './import-utils';
 import { loadInitialData } from './data-loader';
 import { hashPassword, verifyPassword } from './auth-utils';
+import { registerStreakRoutes } from './streak-routes';
 
 // Configure multer for file uploads
 const storage_config = multer.diskStorage({
@@ -53,6 +54,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // API prefixed routes
   const api = "/api";
+
+  registerStreakRoutes(app);
 
   // Dashboard statistics
   app.get(`${api}/dashboard/stats`, async (req, res) => {

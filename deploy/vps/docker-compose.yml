@@ -1,0 +1,32 @@
+# Live copy runs at /opt/gershoncrm/docker-compose.yml on srv1511567 (Hostinger VPS)
+# with the repo cloned to /opt/gershoncrm/src and secrets in /opt/gershoncrm/.env
+# (DB_PASSWORD, SESSION_SECRET — chmod 600, never committed).
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gershoncrm
+      POSTGRES_USER: gershoncrm_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gershoncrm_app -d gershoncrm"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  app:
+    build: ./src
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://gershoncrm_app:${DB_PASSWORD}@db:5432/gershoncrm
+      SESSION_SECRET: ${SESSION_SECRET}
+    ports:
+      - "127.0.0.1:5001:5000"
+volumes:
+  dbdata: {}

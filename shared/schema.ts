@@ -82,6 +82,9 @@ export const dealStages = pgTable("deal_stages", {
   color: text("color").notNull(),
   probability: integer("probability").notNull(),
   count: integer("count").default(0), // To track number of deals in this stage
+  pipelineId: integer("pipeline_id"),
+  streakKey: text("streak_key"),
+  textColor: text("text_color"),
 });
 
 export const insertDealStageSchema = createInsertSchema(dealStages, {
@@ -118,7 +121,11 @@ export const deals = pgTable("deals", {
   boxKey: text("box_key"), // Streak Box Key
   source: text("source"),
   tags: text("tags").array(),
-  customFields: jsonb("custom_fields"),
+  customFields: jsonb("custom_fields"), // { [fieldId]: value } — Streak-style field values
+  pipelineId: integer("pipeline_id"),
+  linkedContacts: jsonb("linked_contacts"), // [{name,email,title,org}] — every contact/org on the box
+  magic: jsonb("magic"), // Streak "magic columns" (last email, counts, next task…)
+  updatedAt: timestamp("updated_at"),
 });
 
 export const insertDealSchema = createInsertSchema(deals, { lastContactedAt: optionalDate, lastEmailDate: optionalDate, nextTaskDueDate: optionalDate, closedAt: optionalDate }).omit({
@@ -162,12 +169,38 @@ export const activities = pgTable("activities", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   threadId: text("thread_id"), // For linking related activities
   createdBy: text("created_by"), // Email of person who created the activity
+  streakKey: text("streak_key"), // Streak comment key when imported
 });
 
 export const insertActivitySchema = createInsertSchema(activities).omit({
   id: true,
   createdAt: true,
 });
+
+// Pipelines (Streak-style): each has its own stages and fields
+export const pipelines = pgTable("pipelines", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  streakKey: text("streak_key"),
+  position: integer("position").default(0),
+});
+
+// Pipeline fields ("columns" in Streak). Values live in deals.custom_fields[String(field.id)].
+// type: TEXT | DROPDOWN | TAG | CHECKBOX | DATE | NUMBER
+// DROPDOWN / TAG values are option keys; options = [{ key, name, color? }]
+export const pipelineFields = pgTable("pipeline_fields", {
+  id: serial("id").primaryKey(),
+  pipelineId: integer("pipeline_id").notNull(),
+  streakKey: text("streak_key"),
+  name: text("name").notNull(),
+  type: text("type").notNull(),
+  options: jsonb("options"),
+  position: integer("position").default(0),
+});
+
+export type FieldOption = { key: string; name: string; color?: string };
+export type Pipeline = typeof pipelines.$inferSelect;
+export type PipelineField = typeof pipelineFields.$inferSelect;
 
 // Type definitions
 export type User = typeof users.$inferSelect;
