@@ -1,7 +1,7 @@
 ================================================================
 HANDOFF.txt  -  gershonCRM
 Written by: Claude (Anthropic) - token-limit handoff protocol
-Date: 2026-09-09
+Date: 2026-09-09 (status refreshed 2026-11-18, see the last section)
 ================================================================
 
 0. WHO YOU ARE READING THIS
@@ -33,7 +33,7 @@ CRITICAL OPERATING RULES - do not break these:
 1. WHAT THIS REPO IS
 ----------------------------------------------------------------
 Product   : GershonCRM
-Live URL  : crm.gershoncrm.com (not yet deployed - see section 4)
+Live URL  : https://crm.gershon.ai (LIVE since 2026-11-10; answers 401 = Caddy basic_auth). crm.gershoncrm.com does NOT resolve (no public DNS record) - see the 2026-11-18 section.
 Does      : A Streak.com-style CRM SaaS. ALSO the single portfolio-wide CHECKPOINT LEDGER for every project - see section 8, this is the more important job right now.
 Users     : Gershon Consulting, single-tenant for a 90-day dogfood; multi-tenancy later
 
@@ -79,6 +79,7 @@ Secrets       : 1Password vault 'GershonCRM Deploy' (VPS creds,
   CP-LIN-001 (Linalysis old extension), CP-SEC-001 (REVOKE A LEAKED
   PAT - treat as urgent).
 - Charles has never been handed his checkpoint URLs.
+(Section 4 is the 2026-09 state; the CRM was deployed on 2026-11-10 - see the 2026-11-18 section.)
 
 5. MISSING / NOT BUILT YET
 ----------------------------------------------------------------
@@ -209,3 +210,24 @@ STILL TO DO  [not done]
 - Still public today: the W35 page lists client names and post counts.
 - Social now answers 401 to the board: it needs SOCIAL_TOKEN once the
   Social app issues one.
+
+================================================================
+2026-11-18 nightly  -  status refresh (docs refreshed)
+================================================================
+Source: git log, open PRs, docs/STATUS.md, live DNS/HTTP check at 02:55 UTC.
+
+LIVE
+- ✅ https://crm.gershon.ai is LIVE (deployed 2026-11-10 on the Hostinger VPS via Docker Compose + Caddy; HTTP 401 = Caddy basic_auth, so it is up and gated). The app has no built-in login yet.
+- ❌ crm.gershoncrm.com does NOT resolve (no public DNS record; connection unreachable). The checkpoints and README that name crm.gershoncrm.com are therefore still unmet. Fix = DNS record for crm in the gershoncrm.com Cloudflare zone pointing at the VPS (Charles, Cloudflare dashboard; brief in docs/CHARLES_DNS_FIX.md), or officially standardise on crm.gershon.ai.
+
+PRs
+- #3 STATUS: Streak copy v2 live, GC Pipeline imported - MERGED 2026-11-17.
+- #2 Streak copy v2: pipelines/fields, editable dropdown options, working notes and comments - MERGED 2026-11-17; deployed live 2026-11-17 (DB backup pre-streak-v2 taken first). GC Pipeline imported: 192 boxes, 9 stages, 24 fields, 107 comments (snapshot of Streak on 2026-11-16, not a live sync).
+- #1 Prepare private CRM pilot and Claude Cowork handoff - still an open DRAFT, HELD (not merged; predates the VPS deploy, needs Olivier's review).
+
+OPEN (from docs/STATUS.md)
+- ❌ Real authentication (login UI + sessions + Google SSO) - Issue #2; today only Caddy basic_auth.
+- ❌ Ongoing Streak -> CRM sync (one-time import only); no Streak emails in the box timeline.
+- ❌ Push-to-deploy (GitHub Actions -> VPS) not wired; deploy = git pull + docker compose build/up on the VPS (see docs/STATUS.md).
+- ❌ Repo is PUBLIC and attached_assets/ holds a Streak contacts export - make the repo private.
+- ❌ Multi-tenancy before any external client.
