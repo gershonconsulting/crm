@@ -54,16 +54,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API prefixed routes
   const api = "/api";
 
-  app.post(`${api}/deal-stages/:id/reorder`, async (req, res) => {
-    const id = Number(req.params.id);
-    const direction = req.body?.direction;
-    if (!Number.isSafeInteger(id) || id < 1 || !['up', 'down'].includes(direction)) return res.status(400).json({ message: 'Invalid stage or direction' });
-    try {
-      const found = await storage.reorderDealStage(id, direction);
-      res.status(found ? 200 : 404).json({ message: found ? 'Stage order saved' : 'Stage not found' });
-    } catch { res.status(500).json({ message: 'Could not reorder stages' }); }
-  });
-
   // Dashboard statistics
   app.get(`${api}/dashboard/stats`, async (req, res) => {
     try {
@@ -951,6 +941,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error deleting user:', error);
       res.status(500).json({ message: "Failed to delete user" });
     }
+  });
+
+  app.post(`${api}/deal-stages/:id/reorder`, async (req, res) => {
+    const id = Number(req.params.id);
+    const direction = req.body?.direction;
+    if (!Number.isSafeInteger(id) || id < 1 || !['up', 'down'].includes(direction)) return res.status(400).json({ message: 'Invalid stage or direction' });
+    try {
+      const found = await storage.reorderDealStage(id, direction);
+      res.status(found ? 200 : 404).json({ message: found ? 'Stage order saved' : 'Stage not found' });
+    } catch { res.status(500).json({ message: 'Could not reorder stages' }); }
   });
 
   return httpServer;

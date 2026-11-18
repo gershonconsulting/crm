@@ -1,49 +1,41 @@
-# CRM pilot — current direction
+# GershonCRM — Status
 
-## Status 2026-11-15 (Claude, thread "Put the CRM pilot live at crm.gershon.ai")
+**Last updated:** 2026-11-16 (Claude) — Streak copy v2 (branch feat/streak-copy)
 
-- ✅ Pilot installed on VPS srv1511567 beside the old stack: /opt/gershoncrm-pilot (app 127.0.0.1:5002, own Postgres 127.0.0.1:5433, secrets only in /opt/gershoncrm-pilot/.env). Old stack on 5001 untouched (rollback).
-- ✅ GC Streak pipeline copied read-only via the Streak connector and imported: 190 deals in 9 stages (21/73/11/22/29/19/9/4/2, same as Streak), 308 contacts, 192 tasks, 107 comment notes. Pre-import DB backup in /opt/gershoncrm-pilot/backups. Snapshot kept on the server only, never in Git.
-- ❌ crm.gershon.ai still routes to the old stack (Caddy basic auth -> 5001). Switch with deploy/pilot/switch-caddy.sh (backs up the Caddyfile; --rollback restores) once Olivier says yes.
-- ❌ Olivier's one-time "choose your password" email (deploy/pilot/send-setup-link.sh) waits on the switch, because the link opens at crm.gershon.ai.
-- Not copied: Gmail threads, attachments/files, saved views. Dropdown/tag keys resolved to names; all Streak fields kept under deal customFields.streak.
-- crm.gershon.ai is DNS-only (not Cloudflare-proxied); TLS is Caddy's own certificate, so "Full (strict)" applies only if the proxy is turned on later.
-- Steps and commands: docs/deploy/EXECUTION_LOG.md.
+## ✅ LIVE at https://crm.gershon.ai
 
-As of 2026-11-09. Claude Cowork is the next operator; start with [COWORK_HANDOFF.md](COWORK_HANDOFF.md). This document supersedes older deployment and product-scope claims.
+Deployed 2026-11-10, Streak copy v2 deployed 2026-11-17 on the existing Hostinger VPS (srv1511567, 187.124.235.148) — the original Phase 0–9 runbook (docs/DEPLOY.md) was superseded by a simpler route on Olivier's decision:
 
-## Agreed scope
+- Docker Compose at `/opt/gershoncrm` (app container + postgres:16, volume `dbdata`), app on 127.0.0.1:5001
+- Caddy (already on the VPS) terminates TLS for `crm.gershon.ai` (auto Let's Encrypt) — no nginx/certbot
+- DNS: A record `crm` → VPS IP in Cloudflare zone `gershon.ai`, DNS-only (grey)
+- `server/db.ts` switched from Neon serverless driver to node-postgres (commit 9d7a0eb)
+- Seeded: 10 stages, 2,095 contacts, 1,048 deals (Streak export CSVs); admin user `olivier` created
+- ⚠️ App has NO built-in login yet — protected by Caddy basic_auth (user `olivier`) until real auth ships (see Issues)
+- Nightly backup: cron 03:15 pg_dump → /var/backups/gershoncrm (14-day retention)
 
-- Canonical address: https://crm.gershon.ai. Olivier confirms control of gershon.ai in Cloudflare.
-- Keep the existing Hostinger VPS; no move of gershoncrm.com nameservers is needed for this CRM.
-- Initial administrator and only tester: olivier@gershonconsulting.com.
-- Email/password sign-in first. Google sign-in is optional later; Google Cloud organization registration is deferred.
-- Migrate this exact Streak pipeline, preserving Streak while testing:
-  https://www.streak.com/a/pipelines/agxzfm1haWxmb29nYWVyNwsSDE9yZ2FuaXphdGlvbiIQb2F0dGlhQGdtYWlsLmNvbQwLEghXb3JrZmxvdxiAgICAwLWbCgw
-- Administrators must eventually see all client pipelines. Future users get only explicitly assigned pipelines. Do not admit other users until query-level pipeline isolation is implemented and tested.
-- No Gmail message access is required for sign-in.
+## 2026-11-16 — Streak copy v2
+- ✅ Pipelines + per-pipeline fields (TEXT/DROPDOWN/TAG/CHECKBOX/DATE/NUMBER) like Streak; values in deals.custom_fields
+- ✅ Box view: Notes (autosave), comments that save (edit/delete), timeline, stage, assignees, every field editable, add/rename/delete field, **Edit options** on any dropdown/tag
+- ✅ Grid: Streak stage funnel, grouped by stage, all fields as columns, inline edit, sort, search, New box
+- ✅ Boot no longer wipes & re-seeds the DB (data-loader seeds only an empty DB); PORT env honoured
+- ✅ Additive startup migration (server/migrate.ts) — no drops
+- ✅ POST /api/import/streak — idempotent Streak import (pipeline def + boxes + comments)
+- ✅ LIVE 2026-11-17 (PR #2 deployed; DB backup /var/backups/gershoncrm/pre-streak-v2-*.sql.gz)
+- ✅ GC Pipeline imported live: 192 boxes, 9 stages, 24 fields, 107 comments (snapshot of Streak on 2026-11-16; not a live sync)
+- ❌ Ongoing Streak→CRM sync (only a one-time import so far)
+- ❌ Box timeline has no Streak emails (Streak API doesn't expose email bodies to the import)
+- ⚠️ Repo is PUBLIC and attached_assets/ holds a Streak contacts export — make repo private
 
-## Prepared application changes, awaiting deployment
+## ❌ Open
 
-- Password sign-in, persistent PostgreSQL sessions, API authorization, same-origin mutation protection, owner allowlist, safe user responses, and sign-out.
-- Optional Google authorization-code sign-in with state, PKCE, nonce and verified identity. No Google credentials created.
-- Standard PostgreSQL driver and explicit environment loading for the VPS.
-- Automatic destructive data reloads disabled; legacy replacement loader refuses to run.
-- Administrative account-creation command: npm run admin:create (hidden password prompts).
-- Repairs to stage editing, contact forms, zero-value deals, and basic task navigation.
+- Implement real authentication (login UI + sessions + Google SSO) — Issue #2
+- Multi-tenancy refactor before external clients
+- CI/CD push-to-deploy (GitHub Actions → VPS) not yet wired; deploys are `git pull && docker compose build app && docker compose up -d app` in /opt/gershoncrm
 
-## Remaining before live use
+## Deploy route
 
-1. Connect securely to the existing VPS and inspect its running apps, capacity and database before changes. No production configuration has been changed.
-2. Obtain a current export or authenticated read access for the exact GC Streak pipeline. The connected browser shows the Streak extension-install page; the Gmail add-on does not expose the full pipeline. The old MAbSilico export in attached_assets is a different dataset and must not be used as a substitute.
-3. Preserve and verify stages, field definitions, contact associations, notes, tasks, source keys and row counts. CSV may omit comments, attachments or activity history; report exclusions before cutover.
-4. Back up the production DB; apply the additive google_subject migration or create the fresh schema; create the pilot administrator interactively.
-5. Point only crm.gershon.ai to the inspected VPS, issue TLS, use Cloudflare Full (strict), and verify login and persistence through a restart.
-6. Verify the copied GC pipeline against Streak before using the CRM as the working system. Keep Streak and a rollback copy until Olivier accepts it.
-7. Finish multi-pipeline data isolation and the user-to-pipeline access matrix before inviting clients.
+SSH to VPS → `cd /opt/gershoncrm/src && git pull && cd .. && docker compose build app && docker compose up -d app`.
+Caddy config: `/etc/caddy/Caddyfile` (crm.gershon.ai block). Secrets: `/opt/gershoncrm/.env` + 1Password.
 
-The code remains a single-pipeline pilot. This is not yet a full Streak replacement or a completed migration. Existing repository data exposure and outstanding token-revocation checks remain to be resolved; do not publish fresh client exports or credentials.
-
-## Local validation for this handoff
-
-Type check, production build and all six pilot tests pass. Authenticated login/CRUD, live PostgreSQL sessions, import reconciliation and production restart persistence remain unverified. No production or Streak data was changed. The old checkpoint index is a historical portfolio snapshot, not the current CRM release checklist.
+Historical docs: `docs/DEPLOY.md`, `docs/ARIEL_MISSION.md`, `docs/CHARLES_MISSION.md`, `docs/CHARLES_DNS_FIX.md` (gershoncrm.com/Tierra path — no longer the plan), `docs/AGENTS.md`.
