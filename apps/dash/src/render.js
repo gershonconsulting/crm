@@ -5,7 +5,7 @@
 // an HTTP status code or an internal error message. Those details go to
 // the Worker logs only (see collect.js). The page says "Not connected yet".
 
-export const VERSION = '1.1';
+export const VERSION = '1.1.1';
 export const TOTAL_PLATFORMS = 5;
 export const STALE_AMBER_DAYS = 8;  // orange when older than this
 export const STALE_RED_DAYS = 15;   // red when older than this
@@ -334,12 +334,12 @@ ${emptyStateHtml(s)}
   <span><span class="dot"></span>No data</span>
   <span>Counts are per platform. The banner turns orange after ${STALE_AMBER_DAYS} days or when last week is missing, and red after ${STALE_RED_DAYS} days.</span>
 </div>`;
-  return page(opts.title || `Weekly Board — ${snap.week} · dash.gershoncrm.com`, inner, weeks, snap.week, opts);
+  return page(opts.title || `Weekly Board — ${snap.week} · Dash by Gershon.AI`, inner, weeks, snap.week, opts);
 }
 
 /** Page for a week that has not been generated (visitors never trigger a run). */
 export function renderMissing(week, weeks, opts = {}) {
   const inner = `<header><h1>Weekly Board${week ? ' · ' + esc(week) : ''}</h1></header>
 <div class="missing"><strong>This week has not been generated yet.</strong><br>The board refreshes automatically every Monday morning. Pick another week on the left.</div>`;
-  return page('Weekly Board · dash.gershoncrm.com', inner, weeks, week, opts);
+  return page('Weekly Board · Dash by Gershon.AI', inner, weeks, week, opts);
 }
