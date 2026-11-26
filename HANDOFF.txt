@@ -231,3 +231,7 @@ OPEN (from docs/STATUS.md)
 - ❌ Push-to-deploy (GitHub Actions -> VPS) not wired; deploy = git pull + docker compose build/up on the VPS (see docs/STATUS.md).
 - ❌ Repo is PUBLIC and attached_assets/ holds a Streak contacts export - make the repo private.
 - ❌ Multi-tenancy before any external client.
+
+## 2026-11-26 nightly push
+✅ PR #5 merged (apps/dash) - Dash titles "Weekly Board - <week> · Dash by Gershon.AI", VERSION 1.1.1 (8/8 tests).
+❌ Not live: the Worker is not Git-connected -> upload (Charles). Live is still 1.2.3 with title "... · dash.gershoncrm.com".
